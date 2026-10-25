@@ -1,14 +1,16 @@
 # The Critic — build spec (Crypto's agent)
 
-Two jobs, both are vetoes:
-1. **Match veto** — reject/quarantine suspicious record→building links
-   from the Matcher before they reach the Investigator.
-2. **Evidence veto** — reject any Investigator finding that carries no
-   record IDs. No evidence, no finding. Non-negotiable.
+The Critic has two jobs, and both of them are vetoes:
+
+1. Match veto — reject or quarantine record→building links from the
+   Matcher that look wrong, before they ever reach the Investigator.
+2. Evidence veto — reject any Investigator finding that carries no
+   record IDs. No evidence, no finding. This one is not negotiable.
 
 ## Contract
 
-Input (one candidate link):
+What comes in (one candidate link):
+
 ```json
 { "record_id": "…", "dataset": "violations|complaints311|permits|evictions",
   "address_raw": "…", "bbl": "1013570031", "bin": "…",
@@ -16,50 +18,61 @@ Input (one candidate link):
   "year_built": 1920, "record_date": "2024-01-15",
   "matcher_confidence": 0.87 }
 ```
-Plus the building card it claims to belong to (same fields, from the
-World Model board / Clerk's view).
 
-Output (one decision, ALWAYS written to the trace):
+It also gets the building card the link claims to belong to — same
+fields, pulled from the World Model board / Clerk's view.
+
+What goes out (one decision, and it ALWAYS gets written to the trace):
+
 ```json
 { "record_id": "…", "decision": "accept|reject|quarantine",
   "rule": "R1…R8 or null", "reason": "one line, human-readable",
   "decided_by": "rule|llm", "model": "nightshift model name or null" }
 ```
 
-## Decision order — rules first, LLM only for the gray zone
+## How a decision gets made — rules first, LLM only for the gray zone
 
-Deterministic rules run first: fast, free, auditable. The LLM (via
-LLM.generate() → Nightshift, judge class / Nemotron) is called ONLY on
-quarantined items, to promote (→accept) or demote (→reject) with a
-written reason. The trace records which path decided — judges love this.
+The deterministic rules run first: they're fast, free, and anyone can
+audit them. The LLM (through LLM.generate() → Nightshift, judge class /
+Nemotron) only gets called on quarantined items, to either promote them
+(→ accept) or demote them (→ reject), with a written reason. The trace
+records which path made the call — the judges like seeing that split.
 
-REJECT (hard):
-- **R1 BBL mismatch** — record BBL ≠ building BBL.
-- **R2 Borough conflict** — BBL/borough code differs.
-- **R3 Geo distance** — record coords > 150 m from building coords
-  (> 500 m is not even the same neighborhood).
-- **R4 Temporal impossibility** — record_date before year_built.
-- **R5 Same-dataset collision** — a record from the same dataset already
+REJECT — hard no:
+
+- R1, BBL mismatch: the record's BBL is not the building's BBL.
+- R2, borough conflict: the BBL / borough code doesn't match.
+- R3, geo distance: the record's coordinates are more than 150 m from
+  the building's. (Over 500 m and it's not even the same neighborhood.)
+- R4, temporal impossibility: record_date is before year_built. A
+  building can't have a violation before it exists.
+- R5, same-dataset collision: a record from the same dataset is already
   pinned to this building under a different record ID for the same event.
 
-QUARANTINE (held out of the verdict; LLM reviews):
-- **R6 Address divergence** — normalized addresses differ beyond the
-  house number (apt/unit artifacts, "123A vs 123", suffix errors).
-- **R7 Class mismatch** — building_class conflicts with the building
-  card and no permits record bridges the change.
-- **R8 Low confidence, uncorroborated** — matcher_confidence < 0.6 and
-  no second dataset confirms the link.
+QUARANTINE — held out of the verdict, the LLM takes a look:
 
-ACCEPT everything else.
+- R6, address divergence: the normalized addresses differ by more than
+  the house number — apt/unit artifacts, "123A vs 123", suffix errors.
+- R7, class mismatch: building_class disagrees with the building card
+  and there's no permits record that explains the change.
+- R8, low confidence and uncorroborated: matcher_confidence under 0.6
+  and no second dataset backs the link up.
+
+Everything else gets accepted.
 
 ## Evidence veto (for Investigator findings)
-Finding arrives as {claim, record_ids[], …}. If record_ids is empty →
-reject, rule **R9 NO_EVIDENCE**. If any record_id is not on the board →
-reject, rule **R10 PHANTOM_SOURCE**.
+
+A finding shows up as {claim, record_ids[], …}. Two ways it dies:
+
+- record_ids is empty → reject, rule R9 NO_EVIDENCE.
+- Any record_id on it isn't actually on the board → reject, rule
+  R10 PHANTOM_SOURCE.
 
 ## Done when
+
 - All 12 fixture cases in critic-fixtures.json pass.
-- One trace shows: a match rejected by rule → Matcher retry accepted →
-  finding with no evidence vetoed by R9.
-- Runs standalone against fixtures with no Zetaris/Nightshift
-  (rules path), so it demos even in SAMPLE_MODE.
+- One trace shows the whole story: a match rejected by rule, the Matcher
+  retries and gets accepted, then a finding with no evidence gets vetoed
+  by R9.
+- It runs standalone against the fixtures with no Zetaris and no
+  Nightshift (rules path only), so it still demos in SAMPLE_MODE.
