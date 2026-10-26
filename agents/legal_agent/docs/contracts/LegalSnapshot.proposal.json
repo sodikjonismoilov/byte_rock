@@ -1,0 +1,774 @@
+{
+  "$defs": {
+    "BuildingInfo": {
+      "properties": {
+        "address": {
+          "title": "Address",
+          "type": "string"
+        },
+        "borough": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Borough"
+        },
+        "bin": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bin"
+        },
+        "bbl": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bbl"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit"
+        },
+        "year_built": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Year Built"
+        },
+        "residential_units": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Residential Units"
+        }
+      },
+      "required": [
+        "address"
+      ],
+      "title": "BuildingInfo",
+      "type": "object"
+    },
+    "CriticOutcome": {
+      "enum": [
+        "BLOCKED",
+        "PASS",
+        "REVISE",
+        "INCONCLUSIVE"
+      ],
+      "title": "CriticOutcome",
+      "type": "string"
+    },
+    "EvidenceConflict": {
+      "properties": {
+        "category": {
+          "title": "Category",
+          "type": "string"
+        },
+        "evidence_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "explanation": {
+          "title": "Explanation",
+          "type": "string"
+        },
+        "resolved": {
+          "default": false,
+          "title": "Resolved",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "category",
+        "evidence_ids",
+        "explanation"
+      ],
+      "title": "EvidenceConflict",
+      "type": "object"
+    },
+    "EvidenceItem": {
+      "properties": {
+        "evidence_id": {
+          "description": "Exact ID from accepted evidence registry; never an authority or mem-* ID",
+          "title": "Evidence Id",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/EvidenceKind"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "date": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "status": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Status"
+        },
+        "violation_class": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Violation Class"
+        },
+        "statute_or_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Statute Or Code"
+        },
+        "building_address": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Building Address"
+        },
+        "metadata": {
+          "additionalProperties": true,
+          "title": "Metadata",
+          "type": "object"
+        }
+      },
+      "required": [
+        "evidence_id",
+        "kind",
+        "source",
+        "description"
+      ],
+      "title": "EvidenceItem",
+      "type": "object"
+    },
+    "EvidenceKind": {
+      "enum": [
+        "complaint",
+        "confirmed_violation",
+        "tenant_report",
+        "other",
+        "inspection",
+        "permit",
+        "case_filing",
+        "decision",
+        "judgment",
+        "warrant",
+        "executed_eviction"
+      ],
+      "title": "EvidenceKind",
+      "type": "string"
+    },
+    "IdentifierEvidence": {
+      "properties": {
+        "kind": {
+          "enum": [
+            "bin",
+            "bbl",
+            "hpd_building_id"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        },
+        "source": {
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        },
+        "record_id": {
+          "minLength": 1,
+          "title": "Record Id",
+          "type": "string"
+        },
+        "authoritative": {
+          "default": false,
+          "title": "Authoritative",
+          "type": "boolean"
+        },
+        "fictional": {
+          "default": false,
+          "title": "Fictional",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "kind",
+        "value",
+        "source",
+        "record_id"
+      ],
+      "title": "IdentifierEvidence",
+      "type": "object"
+    },
+    "IdentityCandidate": {
+      "properties": {
+        "candidate_id": {
+          "title": "Candidate Id",
+          "type": "string"
+        },
+        "address": {
+          "title": "Address",
+          "type": "string"
+        },
+        "borough": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Borough"
+        },
+        "aliases": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Aliases",
+          "type": "array"
+        },
+        "identifiers": {
+          "items": {
+            "$ref": "#/$defs/IdentifierEvidence"
+          },
+          "title": "Identifiers",
+          "type": "array"
+        }
+      },
+      "required": [
+        "candidate_id",
+        "address"
+      ],
+      "title": "IdentityCandidate",
+      "type": "object"
+    },
+    "IdentityResult": {
+      "properties": {
+        "schema_version": {
+          "default": "1.1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "canonical_address": {
+          "title": "Canonical Address",
+          "type": "string"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit"
+        },
+        "borough": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Borough"
+        },
+        "identifiers": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Identifiers",
+          "type": "object"
+        },
+        "verified_identifiers": {
+          "items": {
+            "$ref": "#/$defs/IdentifierEvidence"
+          },
+          "title": "Verified Identifiers",
+          "type": "array"
+        },
+        "candidates": {
+          "items": {
+            "$ref": "#/$defs/IdentityCandidate"
+          },
+          "title": "Candidates",
+          "type": "array"
+        },
+        "rejected_candidates": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Rejected Candidates",
+          "type": "array"
+        },
+        "ambiguities": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Ambiguities",
+          "type": "array"
+        },
+        "match_method": {
+          "default": "none",
+          "title": "Match Method",
+          "type": "string"
+        },
+        "confidence": {
+          "default": 0,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "verification_status": {
+          "default": "missing",
+          "enum": [
+            "verified",
+            "sample",
+            "unverified",
+            "ambiguous",
+            "missing"
+          ],
+          "title": "Verification Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "canonical_address"
+      ],
+      "title": "IdentityResult",
+      "type": "object"
+    },
+    "InvestigationContext": {
+      "properties": {
+        "untrusted_memory": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Untrusted Memory",
+          "type": "array"
+        },
+        "source_coverage": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Source Coverage",
+          "type": "array"
+        },
+        "unresolved_questions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Unresolved Questions",
+          "type": "array"
+        },
+        "root_critic_outcome": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CriticOutcome"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "data_mode": {
+          "default": "sample",
+          "enum": [
+            "sample",
+            "live",
+            "recorded_replay",
+            "mock",
+            "development_fallback"
+          ],
+          "title": "Data Mode",
+          "type": "string"
+        },
+        "data_provider": {
+          "default": "unspecified",
+          "title": "Data Provider",
+          "type": "string"
+        },
+        "schema_version": {
+          "default": "1.1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "identity_candidates": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/IdentityCandidate"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Identity Candidates"
+        },
+        "identity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/IdentityResult"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "record_matches": {
+          "items": {
+            "$ref": "#/$defs/RecordMatch"
+          },
+          "title": "Record Matches",
+          "type": "array"
+        },
+        "reconciliation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ReconciliationResult"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "as_of": {
+          "format": "date",
+          "title": "As Of",
+          "type": "string"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/EvidenceItem"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Notes"
+        },
+        "retrieved_source_ids": {
+          "items": {
+            "description": "Exact retrieved legal catalog authority ID; never evidence or mem-* IDs",
+            "type": "string"
+          },
+          "title": "Retrieved Source Ids",
+          "type": "array"
+        }
+      },
+      "title": "InvestigationContext",
+      "type": "object"
+    },
+    "LegalIssueTask": {
+      "properties": {
+        "task_id": {
+          "title": "Task Id",
+          "type": "string"
+        },
+        "question": {
+          "title": "Question",
+          "type": "string"
+        },
+        "building": {
+          "$ref": "#/$defs/BuildingInfo"
+        },
+        "issue_types": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Issue Types",
+          "type": "array"
+        },
+        "evidence_ids": {
+          "items": {
+            "description": "Exact ID from accepted evidence registry; never an authority or mem-* ID",
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "requested_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Requested By"
+        }
+      },
+      "required": [
+        "task_id",
+        "question",
+        "building"
+      ],
+      "title": "LegalIssueTask",
+      "type": "object"
+    },
+    "ReconciliationResult": {
+      "properties": {
+        "accepted_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Accepted Ids",
+          "type": "array"
+        },
+        "rejected_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Rejected Ids",
+          "type": "array"
+        },
+        "quarantined_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Quarantined Ids",
+          "type": "array"
+        },
+        "duplicate_groups": {
+          "items": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": "Duplicate Groups",
+          "type": "array"
+        },
+        "conflicts": {
+          "items": {
+            "$ref": "#/$defs/EvidenceConflict"
+          },
+          "title": "Conflicts",
+          "type": "array"
+        },
+        "historical_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Historical Ids",
+          "type": "array"
+        },
+        "invalidated_finding_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Invalidated Finding Ids",
+          "type": "array"
+        },
+        "limitations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Limitations",
+          "type": "array"
+        }
+      },
+      "title": "ReconciliationResult",
+      "type": "object"
+    },
+    "RecordMatch": {
+      "properties": {
+        "evidence_id": {
+          "title": "Evidence Id",
+          "type": "string"
+        },
+        "decision": {
+          "enum": [
+            "accepted",
+            "rejected",
+            "quarantined"
+          ],
+          "title": "Decision",
+          "type": "string"
+        },
+        "method": {
+          "title": "Method",
+          "type": "string"
+        },
+        "scope": {
+          "default": "building",
+          "enum": [
+            "building",
+            "property",
+            "unit",
+            "entity"
+          ],
+          "title": "Scope",
+          "type": "string"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidence_id",
+        "decision",
+        "method",
+        "confidence",
+        "reason"
+      ],
+      "title": "RecordMatch",
+      "type": "object"
+    }
+  },
+  "description": "Trusted Keeper projection reuses existing contracts and evidence registry.",
+  "properties": {
+    "version": {
+      "minimum": 0,
+      "title": "Version",
+      "type": "integer"
+    },
+    "task": {
+      "$ref": "#/$defs/LegalIssueTask"
+    },
+    "context": {
+      "$ref": "#/$defs/InvestigationContext"
+    },
+    "evidence_refs": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Evidence Refs",
+      "type": "object"
+    },
+    "task_status": {
+      "default": "pending",
+      "title": "Task Status",
+      "type": "string"
+    },
+    "follow_up_requests": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Follow Up Requests",
+      "type": "array"
+    }
+  },
+  "required": [
+    "version",
+    "task",
+    "context"
+  ],
+  "title": "LegalSnapshot",
+  "type": "object"
+}
