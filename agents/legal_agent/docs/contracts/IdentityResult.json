@@ -1,0 +1,192 @@
+{
+  "$defs": {
+    "IdentifierEvidence": {
+      "properties": {
+        "kind": {
+          "enum": [
+            "bin",
+            "bbl",
+            "hpd_building_id"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        },
+        "source": {
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        },
+        "record_id": {
+          "minLength": 1,
+          "title": "Record Id",
+          "type": "string"
+        },
+        "authoritative": {
+          "default": false,
+          "title": "Authoritative",
+          "type": "boolean"
+        },
+        "fictional": {
+          "default": false,
+          "title": "Fictional",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "kind",
+        "value",
+        "source",
+        "record_id"
+      ],
+      "title": "IdentifierEvidence",
+      "type": "object"
+    },
+    "IdentityCandidate": {
+      "properties": {
+        "candidate_id": {
+          "title": "Candidate Id",
+          "type": "string"
+        },
+        "address": {
+          "title": "Address",
+          "type": "string"
+        },
+        "borough": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Borough"
+        },
+        "aliases": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Aliases",
+          "type": "array"
+        },
+        "identifiers": {
+          "items": {
+            "$ref": "#/$defs/IdentifierEvidence"
+          },
+          "title": "Identifiers",
+          "type": "array"
+        }
+      },
+      "required": [
+        "candidate_id",
+        "address"
+      ],
+      "title": "IdentityCandidate",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "schema_version": {
+      "default": "1.1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "canonical_address": {
+      "title": "Canonical Address",
+      "type": "string"
+    },
+    "unit": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Unit"
+    },
+    "borough": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Borough"
+    },
+    "identifiers": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Identifiers",
+      "type": "object"
+    },
+    "verified_identifiers": {
+      "items": {
+        "$ref": "#/$defs/IdentifierEvidence"
+      },
+      "title": "Verified Identifiers",
+      "type": "array"
+    },
+    "candidates": {
+      "items": {
+        "$ref": "#/$defs/IdentityCandidate"
+      },
+      "title": "Candidates",
+      "type": "array"
+    },
+    "rejected_candidates": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Rejected Candidates",
+      "type": "array"
+    },
+    "ambiguities": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Ambiguities",
+      "type": "array"
+    },
+    "match_method": {
+      "default": "none",
+      "title": "Match Method",
+      "type": "string"
+    },
+    "confidence": {
+      "default": 0,
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Confidence",
+      "type": "number"
+    },
+    "verification_status": {
+      "default": "missing",
+      "enum": [
+        "verified",
+        "sample",
+        "unverified",
+        "ambiguous",
+        "missing"
+      ],
+      "title": "Verification Status",
+      "type": "string"
+    }
+  },
+  "required": [
+    "canonical_address"
+  ],
+  "title": "IdentityResult",
+  "type": "object"
+}

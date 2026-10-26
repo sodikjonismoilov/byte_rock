@@ -1,0 +1,379 @@
+[
+  {
+    "id": "nyc-admin-27-2028",
+    "title": "NYC Administrative Code § 27-2028 — Central heat or electric or gas heating system; when required",
+    "jurisdiction": "NYC",
+    "identifier": "NYC Admin. Code § 27-2028",
+    "url": "https://codelibrary.amlegal.com/codes/newyorkcity/latest/NYCadmin/0-0-0-60405",
+    "topics": [
+      "heat",
+      "heating system",
+      "multiple dwelling",
+      "hot water"
+    ],
+    "summary": "Every multiple dwelling and every tenant-occupied one- or two-family dwelling must be provided with heat from a central heating system, with limited approved gas or electric alternatives.",
+    "excerpt": null,
+    "authority_type": "statute"
+  },
+  {
+    "id": "nyc-admin-27-2029",
+    "title": "NYC Administrative Code § 27-2029 — Minimum temperature to be maintained",
+    "jurisdiction": "NYC",
+    "identifier": "NYC Admin. Code § 27-2029",
+    "url": "https://codelibrary.amlegal.com/codes/newyorkcity/latest/NYCadmin/0-0-0-60405",
+    "topics": [
+      "heat",
+      "temperature",
+      "heat season"
+    ],
+    "summary": "From October 1 through May 31, centrally supplied heat must maintain at least 68°F between 6 a.m. and 10 p.m. when the outside temperature falls below 55°F, and at least 62°F between 10 p.m. and 6 a.m.",
+    "excerpt": null,
+    "authority_type": "statute"
+  },
+  {
+    "id": "nyc-admin-27-2031",
+    "title": "NYC Administrative Code § 27-2031 — Supply of hot water; when required",
+    "jurisdiction": "NYC",
+    "identifier": "NYC Admin. Code § 27-2031",
+    "url": "https://codelibrary.amlegal.com/codes/newyorkcity/latest/NYCadmin/0-0-0-236495",
+    "topics": [
+      "hot water",
+      "plumbing",
+      "habitability"
+    ],
+    "summary": "Section 27-2031 concerns hot-water supply. Catalog text and current HPD guidance differ on hours; verify the operative code version before stating a time-specific legal requirement.",
+    "excerpt": null,
+    "authority_type": "statute",
+    "temporal_limitations": "Unresolved version conflict with HPD 24-hour guidance; do not rely on old 6 a.m.–midnight catalog wording."
+  },
+  {
+    "id": "nyc-admin-27-2024",
+    "title": "NYC Administrative Code § 27-2024 — Water supply to buildings",
+    "jurisdiction": "NYC",
+    "identifier": "NYC Admin. Code § 27-2024",
+    "url": "https://www.nyc.gov/assets/buildings/pdf/HousingMaintenanceCode.pdf",
+    "topics": [
+      "water",
+      "plumbing",
+      "housing maintenance code"
+    ],
+    "summary": "The owner of a dwelling must provide and maintain a supply of pure and wholesome water sufficient in quantity and pressure, and keep the supply free from unsafe connections.",
+    "excerpt": null,
+    "authority_type": "statute"
+  },
+  {
+    "id": "nyc-admin-27-2017-4",
+    "title": "NYC Administrative Code § 27-2017.4 — Violation for pests",
+    "jurisdiction": "NYC",
+    "identifier": "NYC Admin. Code § 27-2017.4",
+    "url": "https://codelibrary.amlegal.com/codes/newyorkcity/latest/NYCadmin/0-0-0-60278",
+    "topics": [
+      "pests",
+      "mice",
+      "rats",
+      "cockroaches",
+      "infestation"
+    ],
+    "summary": "HPD may determine pest infestation and order eradication. Cockroach, mouse, or rat infestation in a dwelling unit or common area is treated as an immediately hazardous (Class C) condition under HPD enforcement practice described on agency pages.",
+    "excerpt": null,
+    "authority_type": "statute"
+  },
+  {
+    "id": "nyc-admin-27-2017-8",
+    "title": "NYC Administrative Code § 27-2017.8 — Integrated pest management practices",
+    "jurisdiction": "NYC",
+    "identifier": "NYC Admin. Code § 27-2017.8",
+    "url": "https://codelibrary.amlegal.com/codes/newyorkcity/latest/NYCadmin/0-0-0-60305",
+    "topics": [
+      "pests",
+      "integrated pest management",
+      "repairs"
+    ],
+    "summary": "When premises are subject to pest infestation or related violations, the owner must use integrated pest management: remove debris, seal entry points, and eliminate water sources. Pesticides may not substitute for those measures.",
+    "excerpt": null,
+    "authority_type": "statute"
+  },
+  {
+    "id": "hpd-lead-local-law-1",
+    "title": "HPD — Lead-Based Paint (Local Law 1 of 2004; NYC Admin. Code § 27-2056 et seq.)",
+    "jurisdiction": "NYC",
+    "identifier": "Local Law 1 of 2004; NYC Admin. Code § 27-2056 et seq.",
+    "url": "https://www.nyc.gov/site/hpd/services-and-information/lead-based-paint.page",
+    "topics": [
+      "lead",
+      "lead-based paint",
+      "children",
+      "peeling paint"
+    ],
+    "summary": "Local Law 1 of 2004 requires owners of pre-1960 buildings (and 1960–1977 buildings if the owner knows lead-based paint is present) to presume paint is lead-based, identify hazards, and address them, especially where a child under six resides.",
+    "excerpt": null,
+    "authority_type": "agency_guidance"
+  },
+  {
+    "id": "rpl-235-b",
+    "title": "New York Real Property Law § 235-b — Warranty of habitability",
+    "jurisdiction": "NY",
+    "identifier": "N.Y. Real Prop. Law § 235-b",
+    "url": "https://www.nysenate.gov/legislation/laws/RPP/235-B",
+    "topics": [
+      "habitability",
+      "lease",
+      "repairs",
+      "heat",
+      "pests"
+    ],
+    "summary": "Every residential lease includes a warranty that the premises are fit for human habitation and that occupants will not be subjected to conditions dangerous to life, health, or safety. Tenant-caused conditions are not a breach. Waiver of these rights is void.",
+    "excerpt": "§ 235-b. Warranty of habitability. 1. In every written or oral lease or rental agreement for residential premises the landlord or lessor shall be deemed to covenant and warrant that the premises so leased or rented and all areas used in connection therewith in common with other tenants or residents are fit for human habitation and for the uses reasonably intended by the parties and that the occupants of such premises shall not be subjected to any conditions which would be dangerous, hazardous or detrimental to their life, health or safety. When any such condition has been caused by the misconduct of the tenant or lessee or persons under his direction or control, it shall not constitute a breach of such covenants and warranties.",
+    "authority_type": "statute",
+    "checked_on": "2026-10-26",
+    "excerpt_provenance": {
+      "source_url": "https://www.nysenate.gov/legislation/laws/RPP/235-B",
+      "retrieved_at": "2026-10-26T04:22:11.667513+00:00",
+      "retrieval_method": "Official page text inspected via web reader; direct HTTP returned 403",
+      "excerpt_sha256": "a5f57a15d458cde3a3012914484ccedbb06fcf61b147578d8cd3ce1a02ca309c",
+      "displayed_revision": "2014-09-22",
+      "historical_version_verified": false
+    },
+    "temporal_limitations": "Official page displays a revision from 2014-09-22. Incident-date applicability has not been verified; this excerpt alone cannot establish property liability."
+  },
+  {
+    "id": "mdw-78",
+    "title": "New York Multiple Dwelling Law § 78 — Repairs",
+    "jurisdiction": "NY",
+    "identifier": "N.Y. Mult. Dwell. Law § 78",
+    "url": "https://www.nysenate.gov/legislation/laws/MDW/78",
+    "topics": [
+      "repairs",
+      "multiple dwelling",
+      "owner duties"
+    ],
+    "summary": "Every multiple dwelling and its lot must be kept in good repair. The owner is responsible for compliance; a tenant is also liable if a violation is caused by the tenant's or household's willful act or negligence.",
+    "excerpt": "§ 78. Repairs. 1. Every multiple dwelling, including its roof or roofs, and every part thereof and the lot upon which it is situated, shall be kept in good repair. The owner shall be responsible for compliance with the provisions of this section; but the tenant also shall be liable if a violation is caused by his own wilful act, assistance or negligence or that of any member of his family or household or his guest. Any such persons who shall wilfully violate or assist in violating any provision of this section shall also jointly and severally be subject to the civil penalties provided in section three hundred four.",
+    "authority_type": "statute",
+    "checked_on": "2026-10-26",
+    "excerpt_provenance": {
+      "source_url": "https://www.nysenate.gov/legislation/laws/MDW/78",
+      "retrieved_at": "2026-10-26T04:22:11.667784+00:00",
+      "retrieval_method": "Official page text inspected via web reader; direct HTTP returned 403",
+      "excerpt_sha256": "211a2c5bf907be19cb291717ee283b29cede6686bf5fcbe64a1bae61df4be5e8",
+      "displayed_revision": "2014-09-22",
+      "historical_version_verified": false
+    },
+    "temporal_limitations": "Official page displays a revision from 2014-09-22. Incident-date applicability has not been verified; this excerpt alone cannot establish property liability."
+  },
+  {
+    "id": "mdw-302-a",
+    "title": "New York Multiple Dwelling Law § 302-a — Abatement of rent in the case of serious violations",
+    "jurisdiction": "NY",
+    "identifier": "N.Y. Mult. Dwell. Law § 302-a",
+    "url": "https://www.nysenate.gov/legislation/laws/MDW/A8",
+    "topics": [
+      "rent abatement",
+      "violations",
+      "housing court"
+    ],
+    "summary": "Multiple Dwelling Law Article 8 includes § 302-a, which addresses rent abatement in the case of serious violations. This catalog records the statute identifier and article location; it does not quote the full operative text.",
+    "excerpt": null,
+    "authority_type": "statute"
+  },
+  {
+    "id": "hpd-heat-hot-water",
+    "title": "NYC HPD — Heat and Hot Water Information",
+    "jurisdiction": "NYC",
+    "identifier": "HPD Heat and Hot Water guidance (summarizing NYC Admin. Code heat/hot-water rules)",
+    "url": "https://www.nyc.gov/site/hpd/services-and-information/heat-and-hot-water-information.page",
+    "topics": [
+      "heat",
+      "hot water",
+      "311",
+      "hpd",
+      "complaints",
+      "violations"
+    ],
+    "summary": "HPD states that owners must provide heat during Heat Season (October 1–May 31) and hot water year-round. Tenants may file 311 complaints; HPD may inspect and issue a violation if an inspector documents noncompliance.",
+    "excerpt": "Building owners are legally required to provide heat and hot water to their tenants. Hot water must be provided 365 days per year at a constant minimum temperature of 120 degrees Fahrenheit. Heat must be provided between October 1st and May 31st, i.e. \"Heat Season,\" under the following conditions:",
+    "authority_type": "agency_guidance",
+    "checked_on": "2026-10-26",
+    "excerpt_provenance": {
+      "source_url": "https://www.nyc.gov/site/hpd/services-and-information/heat-and-hot-water-information.page",
+      "retrieved_at": "2026-10-26T04:21:25.049851+00:00",
+      "page_sha256": "871b572e95fac9ec6fd03fd66df6f9dd9788eaf8afc1028ca59f11dcebb6c342",
+      "excerpt_sha256": "cdafa80d83e1ca4e79d7ec6aea8164bf3d6d6ed97cc2edc4fef57ba67a7770bf",
+      "normalization": "HTML text; whitespace collapsed; exact contiguous excerpt",
+      "historical_version_verified": false
+    },
+    "temporal_limitations": "Exact official-page excerpt retrieved 2026-10-26. Incident-date applicability and effective version still require verification; current guidance is not a finding of past liability."
+  },
+  {
+    "id": "hpd-complaints-violations",
+    "title": "NYC HPD — Report a Quality or Safety Issue (complaints versus violations)",
+    "jurisdiction": "NYC",
+    "identifier": "HPD complaint and violation process",
+    "url": "https://www.nyc.gov/site/hpd/services-and-information/report-a-maintenance-issue.page",
+    "topics": [
+      "complaints",
+      "violations",
+      "311",
+      "inspection",
+      "hpd"
+    ],
+    "summary": "A 311 complaint reports a condition; it is not itself a confirmed code violation. HPD notifies the owner and may inspect. A violation is issued only if an inspector writes one. Correction deadlines depend on class (A, B, or C).",
+    "excerpt": null,
+    "authority_type": "agency_guidance"
+  },
+  {
+    "id": "hpd-clear-violations",
+    "title": "NYC HPD — Clear Violations",
+    "jurisdiction": "NYC",
+    "identifier": "HPD violation classes A, B, and C",
+    "url": "https://www.nyc.gov/site/hpd/services-and-information/clear-violations.page",
+    "topics": [
+      "violations",
+      "hpd",
+      "enforcement"
+    ],
+    "summary": "HPD enforces the Housing Maintenance Code and Multiple Dwelling Law. Open violations are listed in HPD Online. Classes are A (non-hazardous), B (hazardous), and C (immediately hazardous).",
+    "excerpt": "The New York City Department of Housing Preservation and Development (HPD) is responsible for enforcing State and City laws and codes relating to housing quality and safety. For units subsidized with HPD issued Section 8 vouchers, HPD also inspects for compliance with federal Housing Quality Standards (HQS). The agency issues Notices of Violation related to noncompliance with the New York City Housing Maintenance Code and New York State Multiple Dwelling Law, Orders to Correct , and Section 8 Housing Quality Standards failure notices. To check if there are open violations pending against the property, go to HPDONLINE and enter the property address. HPDONLINE provides information about violations and orders. Violations specify hazard class of A (non-hazardous), B (hazardous) or C (immediately hazardous). Orders to Repair and Orders to Repair/Vacate Orders issued by HPD appear on the violation list with a hazardous class of “I”.",
+    "authority_type": "agency_guidance",
+    "checked_on": "2026-10-26",
+    "excerpt_provenance": {
+      "source_url": "https://www.nyc.gov/site/hpd/services-and-information/clear-violations.page",
+      "retrieved_at": "2026-10-26T04:21:26.106743+00:00",
+      "page_sha256": "9983d011ea14cbfe765e25bda0d7acc701e3d32ec7ebb05a373167c5166216ef",
+      "excerpt_sha256": "ef3848e4cec064e6ed5662592a873ff7e65d443f557451c73cc4283368fa16a1",
+      "normalization": "HTML text; whitespace collapsed; exact contiguous excerpt",
+      "historical_version_verified": false
+    },
+    "temporal_limitations": "Exact official-page excerpt retrieved 2026-10-26. Incident-date applicability and effective version still require verification; current guidance is not a finding of past liability."
+  },
+  {
+    "id": "hcr-rent-regulation",
+    "title": "NYS Homes and Community Renewal — Most Common Rent Regulation Issues for Tenants",
+    "jurisdiction": "NY",
+    "identifier": "DHCR/HCR rent regulation tenant guidance",
+    "url": "https://hcr.ny.gov/most-common-rent-regulation-issues-tenants",
+    "topics": [
+      "rent stabilization",
+      "rent reduction",
+      "overcharge",
+      "essential services"
+    ],
+    "summary": "Rent-regulated tenants may file DHCR complaints for overcharge, failure to renew a lease, or decrease in required services (including lack of heat/hot water). A rent reduction, if granted, remains until services are restored and DHCR issues a restoration order.",
+    "excerpt": null,
+    "authority_type": "agency_guidance"
+  },
+  {
+    "id": "hpd-allergens",
+    "title": "HPD Indoor Allergen Hazards",
+    "jurisdiction": "NYC",
+    "identifier": "HPD indoor allergen guidance",
+    "url": "https://www.nyc.gov/site/hpd/services-and-information/indoor-allergen-hazards-mold-and-pests.page",
+    "topics": [
+      "mold",
+      "pests",
+      "leaks",
+      "maintenance"
+    ],
+    "summary": "HPD describes covered owners’ inspection and remediation duties for indoor mold and pests; applicability and correction require property-specific verification.",
+    "authority_type": "agency_guidance",
+    "checked_on": "2026-10-26",
+    "excerpt": "In New York City, Local Law 55 of 2018 requires that owners of buildings with three or more apartments keep their tenants’ apartments free of mold and pests. This includes safely fixing the conditions that cause these problems.",
+    "excerpt_provenance": {
+      "source_url": "https://www.nyc.gov/site/hpd/services-and-information/indoor-allergen-hazards-mold-and-pests.page",
+      "retrieved_at": "2026-10-26T04:21:25.476131+00:00",
+      "page_sha256": "ab13698328aeabb4a6123f2f1a834b319b07c07a2766374f45d3a41176ddcbd9",
+      "excerpt_sha256": "62cae9af328f8eb8a3de4841e19f079408e8621f14296e1f9d9039b1bc358a58",
+      "normalization": "HTML text; whitespace collapsed; exact contiguous excerpt",
+      "historical_version_verified": false
+    },
+    "temporal_limitations": "Exact official-page excerpt retrieved 2026-10-26. Incident-date applicability and effective version still require verification; current guidance is not a finding of past liability."
+  },
+  {
+    "id": "dob-occupancy",
+    "title": "DOB Certificate of Occupancy",
+    "jurisdiction": "NYC",
+    "identifier": "DOB Certificate of Occupancy guidance",
+    "url": "https://www.nyc.gov/site/buildings/industry/obtain-a-co.page",
+    "topics": [
+      "DOB",
+      "construction",
+      "permits",
+      "occupancy",
+      "safety"
+    ],
+    "summary": "A certificate of occupancy states legal use and permitted occupancy. Some older buildings are exempt; an absent record alone does not establish unlawful occupancy.",
+    "authority_type": "agency_guidance",
+    "checked_on": "2026-10-26",
+    "excerpt": "A Certificate of Occupancy (CO) states the legal use and/or type of permitted occupancy for a building. New buildings must have a CO, and existing buildings must have a current or amended CO when construction will change their use, egress or type of occupancy.",
+    "excerpt_provenance": {
+      "source_url": "https://www.nyc.gov/site/buildings/industry/obtain-a-co.page",
+      "retrieved_at": "2026-10-26T04:21:25.810864+00:00",
+      "page_sha256": "2fbdf6bc6260dfcb36d6c2e375a80a2408c1310b55c819e67241a91c4e73657d",
+      "excerpt_sha256": "38dc2b58c28215c0fb37fb29bf2b92865eb20f6077d99355fcc02438b11478cf",
+      "normalization": "HTML text; whitespace collapsed; exact contiguous excerpt",
+      "historical_version_verified": false
+    },
+    "temporal_limitations": "Exact official-page excerpt retrieved 2026-10-26. Incident-date applicability and effective version still require verification; current guidance is not a finding of past liability."
+  },
+  {
+    "id": "courts-eviction",
+    "title": "New York Courts Evicting a Tenant",
+    "jurisdiction": "NY",
+    "identifier": "NY Courts eviction process guidance",
+    "url": "https://www.nycourts.gov/help/homes-evictions/evicting-tenant",
+    "topics": [
+      "eviction",
+      "warrant",
+      "judgment",
+      "executed"
+    ],
+    "summary": "A case filing, judgment, warrant and execution are distinct procedural events; the supplied record must identify which event occurred.",
+    "authority_type": "court_guidance",
+    "checked_on": "2026-10-25"
+  },
+  {
+    "id": "courts-records",
+    "title": "New York Courts eCourts",
+    "jurisdiction": "NY",
+    "identifier": "NY Courts eCourts public case information",
+    "url": "https://www.nycourts.gov/e-courts",
+    "topics": [
+      "litigation",
+      "housing court",
+      "WebCivil",
+      "NYSCEF",
+      "Supreme Court"
+    ],
+    "summary": "Public case indexes support docket research; case documents and property linkage are necessary before assessing allegations or outcomes.",
+    "authority_type": "court_guidance",
+    "checked_on": "2026-10-25"
+  },
+  {
+    "id": "dob-boilers",
+    "title": "NYC DOB Boiler Inspection and Work guidance",
+    "jurisdiction": "NYC",
+    "identifier": "DOB Boilers guidance (inspection, licensing and permit requirements)",
+    "url": "https://www.nyc.gov/site/buildings/property-or-business-owner/boiler.page",
+    "topics": [
+      "boiler",
+      "heating",
+      "construction",
+      "inspection",
+      "permits",
+      "certification"
+    ],
+    "summary": "DOB guidance on boiler inspection and work requirements; verify applicable exemptions and the incident-date rules.",
+    "authority_type": "agency_guidance",
+    "excerpt": "New York City law requires that every boiler in a building be inspected annually, by a qualified professional who could either be a Licensed Master Plumber or a Licensed Oil Burner Installer. No Boiler work can be performed without either a work permit, or without hiring a Licensed Oil Burner Installer or Licensed Master Plumber.",
+    "checked_on": "2026-10-26",
+    "excerpt_provenance": {
+      "source_url": "https://www.nyc.gov/site/buildings/property-or-business-owner/boiler.page",
+      "retrieved_at": "2026-10-26T04:21:26.427126+00:00",
+      "page_sha256": "adc832e117dd82299d203feb6e8b4a485025adf4ae857bed57aed4e0d9362a23",
+      "excerpt_sha256": "6e3cf3db14d38e278fe026c1fb18bce43982e0dd8f4bb1b9e2fb419fdb9c3c8e",
+      "normalization": "HTML text; whitespace collapsed; exact contiguous excerpt",
+      "historical_version_verified": false
+    },
+    "temporal_limitations": "Exact official-page excerpt retrieved 2026-10-26. Incident-date applicability and effective version still require verification; current guidance is not a finding of past liability."
+  }
+]

@@ -1,0 +1,125 @@
+{
+  "$defs": {
+    "CriticIssue": {
+      "properties": {
+        "memory_ids": {
+          "items": {
+            "description": "H-MEM context ID only; cannot support factual or legal conclusions",
+            "pattern": "^mem-[0-9]+$",
+            "type": "string"
+          },
+          "title": "Memory Ids",
+          "type": "array"
+        },
+        "recoverable": {
+          "default": false,
+          "title": "Recoverable",
+          "type": "boolean"
+        },
+        "follow_up_query": {
+          "anyOf": [
+            {
+              "maxLength": 3000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Follow Up Query"
+        },
+        "evidence_ids": {
+          "items": {
+            "description": "Exact ID from accepted evidence registry; never an authority or mem-* ID",
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "required_correction": {
+          "default": "Recheck affected evidence and retrieve supporting authority.",
+          "title": "Required Correction",
+          "type": "string"
+        },
+        "recommended_agent_or_tool": {
+          "default": "legal_search",
+          "title": "Recommended Agent Or Tool",
+          "type": "string"
+        },
+        "priority": {
+          "default": 1,
+          "maximum": 3,
+          "minimum": 1,
+          "title": "Priority",
+          "type": "integer"
+        },
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "finding_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Finding Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "CriticIssue",
+      "type": "object"
+    },
+    "CriticOutcome": {
+      "enum": [
+        "BLOCKED",
+        "PASS",
+        "REVISE",
+        "INCONCLUSIVE"
+      ],
+      "title": "CriticOutcome",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "task_id": {
+      "title": "Task Id",
+      "type": "string"
+    },
+    "outcome": {
+      "$ref": "#/$defs/CriticOutcome"
+    },
+    "issues": {
+      "items": {
+        "$ref": "#/$defs/CriticIssue"
+      },
+      "title": "Issues",
+      "type": "array"
+    },
+    "revision_instructions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Revision Instructions",
+      "type": "array"
+    },
+    "reasoning_mode": {
+      "default": "demo_deterministic",
+      "title": "Reasoning Mode",
+      "type": "string"
+    }
+  },
+  "required": [
+    "task_id",
+    "outcome"
+  ],
+  "title": "CriticReport",
+  "type": "object"
+}

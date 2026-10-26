@@ -1,0 +1,32 @@
+{
+  "fixture_notice": "Synthetic reference-domain regression, not a captured investigation.",
+  "plan": {
+    "task_id": "synthetic-memory-regression",
+    "objective": "Reject memory as evidence",
+    "questions": [
+      {
+        "question_id": "q1",
+        "prompt": "Review accepted records",
+        "evidence_ids": [
+          "mem-2"
+        ]
+      }
+    ]
+  },
+  "finding": {
+    "finding_id": "F002",
+    "issue": "maintenance",
+    "summary": "Invalid memory dependencies must fail validation",
+    "evidence_ids": [
+      "mem-2"
+    ],
+    "legal_conclusions": [
+      {
+        "statement": "Invalid source reference",
+        "source_ids": [
+          "mem-3"
+        ]
+      }
+    ]
+  }
+}
