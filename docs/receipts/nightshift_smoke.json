@@ -1,0 +1,59 @@
+{
+  "timestamp_utc": "2026-10-26T16:20:00+00:00",
+  "base_url": "http://127.0.0.1:8088/v1",
+  "prompt": "Reply with exactly: ok",
+  "results": [
+    {
+      "alias": "meterless/auto",
+      "http_status": 200,
+      "model": "nvidia/nemotron-3.5-bolt-e4b",
+      "usage": {
+        "prompt_tokens": 14,
+        "completion_tokens": 2,
+        "total_tokens": 16
+      },
+      "request_id": null,
+      "elapsed_s": 0.38,
+      "error": null
+    },
+    {
+      "alias": "meterless/fast",
+      "http_status": 200,
+      "model": "nvidia/nemotron-3.5-bolt-e4b",
+      "usage": {
+        "prompt_tokens": 14,
+        "completion_tokens": 2,
+        "total_tokens": 16
+      },
+      "request_id": null,
+      "elapsed_s": 0.29,
+      "error": null
+    },
+    {
+      "alias": "meterless/cheap",
+      "http_status": 200,
+      "model": "nvidia/nemotron-3.5-bolt-e4b",
+      "usage": {
+        "prompt_tokens": 14,
+        "completion_tokens": 2,
+        "total_tokens": 16
+      },
+      "request_id": null,
+      "elapsed_s": 0.29,
+      "error": null
+    },
+    {
+      "alias": "meterless/deep",
+      "http_status": 200,
+      "model": "nvidia/nemotron-3.5-bolt-e4b",
+      "usage": {
+        "prompt_tokens": 14,
+        "completion_tokens": 2,
+        "total_tokens": 16
+      },
+      "request_id": null,
+      "elapsed_s": 0.42,
+      "error": null
+    }
+  ]
+}
