@@ -1,0 +1,91 @@
+{
+  "$defs": {
+    "IdentifierEvidence": {
+      "properties": {
+        "kind": {
+          "enum": [
+            "bin",
+            "bbl",
+            "hpd_building_id"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        },
+        "source": {
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        },
+        "record_id": {
+          "minLength": 1,
+          "title": "Record Id",
+          "type": "string"
+        },
+        "authoritative": {
+          "default": false,
+          "title": "Authoritative",
+          "type": "boolean"
+        },
+        "fictional": {
+          "default": false,
+          "title": "Fictional",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "kind",
+        "value",
+        "source",
+        "record_id"
+      ],
+      "title": "IdentifierEvidence",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "candidate_id": {
+      "title": "Candidate Id",
+      "type": "string"
+    },
+    "address": {
+      "title": "Address",
+      "type": "string"
+    },
+    "borough": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Borough"
+    },
+    "aliases": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Aliases",
+      "type": "array"
+    },
+    "identifiers": {
+      "items": {
+        "$ref": "#/$defs/IdentifierEvidence"
+      },
+      "title": "Identifiers",
+      "type": "array"
+    }
+  },
+  "required": [
+    "candidate_id",
+    "address"
+  ],
+  "title": "IdentityCandidate",
+  "type": "object"
+}

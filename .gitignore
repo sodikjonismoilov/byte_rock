@@ -16,3 +16,23 @@ outputs/
 .DS_Store
 .idea/
 .vscode/
+
+.env.local
+
+# Private provider preferences (includes meterless_runtime_token) and local memory
+.local/
+
+# Generated investigation evidence, reports and append-only traces (local only)
+/reports/
+*.jsonl
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+*.egg-info/
+node_modules/
+# Provider secrets and exported private keys
+.env.*
+!.env.example
+*.pem
+*.key
