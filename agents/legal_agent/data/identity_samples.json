@@ -1,0 +1,92 @@
+[
+  {
+    "candidate_id": "fictional-0",
+    "address": "214 East 7th Street",
+    "borough": "Manhattan",
+    "aliases": [
+      "216 East 7th Street"
+    ],
+    "identifiers": [
+      {
+        "kind": "bin",
+        "value": "1000001",
+        "source": "Fictional identity fixture (not NYC verification)",
+        "record_id": "fixture-0",
+        "fictional": true
+      },
+      {
+        "kind": "bbl",
+        "value": "1003890024",
+        "source": "Fictional identity fixture (not NYC verification)",
+        "record_id": "fixture-0",
+        "fictional": true
+      }
+    ]
+  },
+  {
+    "candidate_id": "fictional-1",
+    "address": "88-12 Roosevelt Avenue",
+    "borough": "Queens",
+    "aliases": [],
+    "identifiers": [
+      {
+        "kind": "bin",
+        "value": "4000002",
+        "source": "Fictional identity fixture (not NYC verification)",
+        "record_id": "fixture-1",
+        "fictional": true
+      },
+      {
+        "kind": "bbl",
+        "value": "4012870033",
+        "source": "Fictional identity fixture (not NYC verification)",
+        "record_id": "fixture-1",
+        "fictional": true
+      }
+    ]
+  },
+  {
+    "candidate_id": "fictional-2",
+    "address": "410 West 145th Street",
+    "borough": "Manhattan",
+    "aliases": [],
+    "identifiers": [
+      {
+        "kind": "bin",
+        "value": "1000003",
+        "source": "Fictional identity fixture (not NYC verification)",
+        "record_id": "fixture-2",
+        "fictional": true
+      },
+      {
+        "kind": "bbl",
+        "value": "1020450012",
+        "source": "Fictional identity fixture (not NYC verification)",
+        "record_id": "fixture-2",
+        "fictional": true
+      }
+    ]
+  },
+  {
+    "candidate_id": "fictional-3",
+    "address": "19 Pierrepont Street",
+    "borough": "Brooklyn",
+    "aliases": [],
+    "identifiers": [
+      {
+        "kind": "bin",
+        "value": "3000004",
+        "source": "Fictional identity fixture (not NYC verification)",
+        "record_id": "fixture-3",
+        "fictional": true
+      },
+      {
+        "kind": "bbl",
+        "value": "3002500019",
+        "source": "Fictional identity fixture (not NYC verification)",
+        "record_id": "fixture-3",
+        "fictional": true
+      }
+    ]
+  }
+]

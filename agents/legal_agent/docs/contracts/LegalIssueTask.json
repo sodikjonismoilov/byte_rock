@@ -1,0 +1,136 @@
+{
+  "$defs": {
+    "BuildingInfo": {
+      "properties": {
+        "address": {
+          "title": "Address",
+          "type": "string"
+        },
+        "borough": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Borough"
+        },
+        "bin": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bin"
+        },
+        "bbl": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bbl"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit"
+        },
+        "year_built": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Year Built"
+        },
+        "residential_units": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Residential Units"
+        }
+      },
+      "required": [
+        "address"
+      ],
+      "title": "BuildingInfo",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "task_id": {
+      "title": "Task Id",
+      "type": "string"
+    },
+    "question": {
+      "title": "Question",
+      "type": "string"
+    },
+    "building": {
+      "$ref": "#/$defs/BuildingInfo"
+    },
+    "issue_types": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Issue Types",
+      "type": "array"
+    },
+    "evidence_ids": {
+      "items": {
+        "description": "Exact ID from accepted evidence registry; never an authority or mem-* ID",
+        "type": "string"
+      },
+      "title": "Evidence Ids",
+      "type": "array"
+    },
+    "requested_by": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Requested By"
+    }
+  },
+  "required": [
+    "task_id",
+    "question",
+    "building"
+  ],
+  "title": "LegalIssueTask",
+  "type": "object"
+}

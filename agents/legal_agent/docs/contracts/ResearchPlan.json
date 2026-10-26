@@ -1,0 +1,131 @@
+{
+  "$defs": {
+    "ResearchQuestion": {
+      "properties": {
+        "memory_ids": {
+          "description": "Optional context hints only, not evidence inputs",
+          "items": {
+            "description": "H-MEM context ID only; cannot support factual or legal conclusions",
+            "pattern": "^mem-[0-9]+$",
+            "type": "string"
+          },
+          "title": "Memory Ids",
+          "type": "array"
+        },
+        "recommended_tool": {
+          "default": "legal_search",
+          "enum": [
+            "legal_search",
+            "evidence_review",
+            "request_external"
+          ],
+          "title": "Recommended Tool",
+          "type": "string"
+        },
+        "required_inputs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Required Inputs",
+          "type": "array"
+        },
+        "dependencies": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Dependencies",
+          "type": "array"
+        },
+        "priority": {
+          "default": 2,
+          "maximum": 3,
+          "minimum": 1,
+          "title": "Priority",
+          "type": "integer"
+        },
+        "completion_condition": {
+          "default": "Return cited analysis or an explicit evidence gap.",
+          "title": "Completion Condition",
+          "type": "string"
+        },
+        "question_id": {
+          "title": "Question Id",
+          "type": "string"
+        },
+        "prompt": {
+          "title": "Prompt",
+          "type": "string"
+        },
+        "focus_topics": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Focus Topics",
+          "type": "array"
+        },
+        "evidence_ids": {
+          "items": {
+            "description": "Exact ID from accepted evidence registry; never an authority or mem-* ID",
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "question_id",
+        "prompt"
+      ],
+      "title": "ResearchQuestion",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "task_id": {
+      "title": "Task Id",
+      "type": "string"
+    },
+    "revision": {
+      "default": 0,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "objective": {
+      "title": "Objective",
+      "type": "string"
+    },
+    "questions": {
+      "items": {
+        "$ref": "#/$defs/ResearchQuestion"
+      },
+      "title": "Questions",
+      "type": "array"
+    },
+    "constraints": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Constraints",
+      "type": "array"
+    },
+    "reasoning_mode": {
+      "default": "demo_deterministic",
+      "title": "Reasoning Mode",
+      "type": "string"
+    },
+    "notes": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Notes",
+      "type": "array"
+    }
+  },
+  "required": [
+    "task_id",
+    "objective",
+    "questions"
+  ],
+  "title": "ResearchPlan",
+  "type": "object"
+}
