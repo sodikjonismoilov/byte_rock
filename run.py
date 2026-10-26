@@ -10,6 +10,13 @@ Exit:   0 completed, 2 inconclusive (partial factual report), 1 error / bad inpu
 
 SAMPLE_MODE replays a recorded capture. The only address in that capture is the
 synthetic "1 Mock Street, Manhattan"; every run is labelled data_mode=recorded_replay.
+
+Defaults (os.environ.setdefault, so your own environment always wins):
+  both modes  LEGAL_MEMORY_DIR=.local/legal-memory   H-MEM (Meterless engine) on by default
+  live mode   LLM_PROVIDER=meterless, LEGAL_CONTEXT_MAX_BYTES=60000,
+              LEGAL_CONTEXT_MAX_TOKENS=60000, LEGAL_MODEL_MAX_TOKENS=100000,
+              INVESTIGATION_TIMEOUT=480 (a model-backed run takes ~225 s)
+Other knobs: RUN_REASONING (live, default "configured"), RUN_OUTPUT (default ./outputs).
 """
 import json
 import os
@@ -23,6 +30,23 @@ from scripts.investigate_address import argument_parser, run_investigation  # no
 
 SAMPLE_REPLAY = ROOT / "agents/legal_agent/tests/fixtures/address_replay.synthetic.json"
 SAMPLE_ADDRESS = "1 mock street"
+
+
+LIVE_DEFAULTS = {
+    "LLM_PROVIDER": "meterless",
+    # The repo defaults (40000 bytes / 16000 tokens) stop the Planner before any model call.
+    "LEGAL_CONTEXT_MAX_BYTES": "60000",
+    "LEGAL_CONTEXT_MAX_TOKENS": "60000",
+    "LEGAL_MODEL_MAX_TOKENS": "100000",
+    "INVESTIGATION_TIMEOUT": "480",
+}
+
+
+def apply_env_defaults() -> None:
+    os.environ.setdefault("LEGAL_MEMORY_DIR", str(ROOT / ".local" / "legal-memory"))
+    if not sample_mode():
+        for key, value in LIVE_DEFAULTS.items():
+            os.environ.setdefault(key, value)
 
 
 def sample_mode() -> bool:
@@ -46,8 +70,8 @@ def build_argv(case: dict, output: Path) -> list[str]:
     if sample_mode():
         argv += ["--provider", "replay", "--replay", str(SAMPLE_REPLAY), "--reasoning", "deterministic"]
     else:
-        # Nightshift is the required primary provider; it fails loudly if not configured.
-        argv += ["--provider", "zetaris", "--reasoning", os.getenv("RUN_REASONING", "nightshift")]
+        # LLM_PROVIDER=meterless + "configured" is the official Meterless/Nightshift path.
+        argv += ["--provider", "zetaris", "--reasoning", os.getenv("RUN_REASONING", "configured")]
     return argv
 
 
@@ -66,6 +90,7 @@ def main(argv=None) -> int:
         print("SAMPLE_MODE only contains a recording for '1 Mock Street'; "
               "other addresses will come back mostly unavailable.", file=sys.stderr)
 
+    apply_env_defaults()
     output = Path(os.getenv("RUN_OUTPUT", ROOT / "outputs"))
     args = argument_parser().parse_args(build_argv(case, output))
     summary, directory = run_investigation(args)
