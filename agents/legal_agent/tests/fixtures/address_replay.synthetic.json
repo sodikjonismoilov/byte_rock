@@ -1,0 +1,161 @@
+{
+  "fixture_notice": "SYNTHETIC OFFLINE FIXTURE. Fictional address and records; not real NYC evidence.",
+  "provider": "synthetic-fixture",
+  "generated_at": "2026-01-01T00:00:00+00:00",
+  "retrievals": [
+    {
+      "source_key": "hpd_buildings",
+      "provider": "mock",
+      "rows": [
+        {
+          "buildingid": "123",
+          "bin": "1000001",
+          "boroid": "1",
+          "boro": "MANHATTAN",
+          "block": "5",
+          "lot": "1",
+          "housenumber": "1",
+          "lowhousenumber": "1",
+          "highhousenumber": "1",
+          "streetname": "MOCK STREET",
+          "zip": "10001",
+          "recordstatus": "Active"
+        }
+      ],
+      "pages": [
+        {
+          "source": "hpd_buildings",
+          "provider": "mock",
+          "upstream_url": "https://data.cityofnewyork.us/resource/kj4p-ruqc.json?%24where=%28housenumber+%3D+%271%27+OR+lowhousenumber+%3D+%271%27+OR+highhousenumber+%3D+%271%27%29+AND+%28upper%28streetname%29+%3D+%27MOCK+SAINT%27+OR+upper%28streetname%29+%3D+%27MOCK+ST%27+OR+upper%28streetname%29+%3D+%27MOCK+STREET%27%29+AND+boroid+%3D+1&%24order=buildingid&%24limit=100&%24offset=0",
+          "page": 0,
+          "requested_at": "2026-10-26T06:40:32.241881+00:00",
+          "status": "ok",
+          "row_count": 1,
+          "retrieved_at": "2026-01-01T00:00:00+00:00"
+        }
+      ],
+      "status": "retrieved",
+      "complete": true,
+      "reason": "",
+      "match_field": "address_and_borough",
+      "query_filter": "(housenumber = '1' OR lowhousenumber = '1' OR highhousenumber = '1') AND (upper(streetname) = 'MOCK SAINT' OR upper(streetname) = 'MOCK ST' OR upper(streetname) = 'MOCK STREET') AND boroid = 1"
+    },
+    {
+      "source_key": "hpd_buildings",
+      "provider": "mock",
+      "rows": [
+        {
+          "buildingid": "123",
+          "bin": "1000001",
+          "boroid": "1",
+          "boro": "MANHATTAN",
+          "block": "5",
+          "lot": "1",
+          "housenumber": "1",
+          "lowhousenumber": "1",
+          "highhousenumber": "1",
+          "streetname": "MOCK STREET",
+          "zip": "10001",
+          "recordstatus": "Active"
+        }
+      ],
+      "pages": [
+        {
+          "source": "hpd_buildings",
+          "provider": "mock",
+          "upstream_url": "https://data.cityofnewyork.us/resource/kj4p-ruqc.json?%24where=boroid+%3D+1+AND+block+%3D+5+AND+lot+%3D+1&%24order=buildingid&%24limit=100&%24offset=0",
+          "page": 0,
+          "requested_at": "2026-10-26T06:40:32.246643+00:00",
+          "status": "ok",
+          "row_count": 1,
+          "retrieved_at": "2026-01-01T00:00:00+00:00"
+        }
+      ],
+      "status": "retrieved",
+      "complete": true,
+      "reason": "",
+      "match_field": "lot_context",
+      "query_filter": "boroid = 1 AND block = 5 AND lot = 1"
+    },
+    {
+      "source_key": "hpd_registrations",
+      "provider": "mock",
+      "rows": [],
+      "pages": [
+        {
+          "source": "hpd_registrations",
+          "provider": "mock",
+          "upstream_url": "https://data.cityofnewyork.us/resource/tesw-yqqr.json?%24where=buildingid+%3D+123&%24order=registrationid&%24limit=100&%24offset=0",
+          "page": 0,
+          "requested_at": "2026-10-26T06:40:32.248680+00:00",
+          "status": "ok",
+          "row_count": 0,
+          "retrieved_at": "2026-01-01T00:00:00+00:00"
+        }
+      ],
+      "status": "no_records",
+      "complete": true,
+      "reason": "",
+      "match_field": "hpd_building_id",
+      "query_filter": "buildingid = 123"
+    },
+    {
+      "source_key": "hpd_violations",
+      "provider": "mock",
+      "rows": [
+        {
+          "buildingid": "123",
+          "bin": "1000001",
+          "bbl": "1000050001",
+          "housenumber": "1",
+          "streetname": "MOCK STREET",
+          "violationid": "1",
+          "inspectiondate": "2026-01-01T00:00:00.000",
+          "currentstatus": "OPEN",
+          "novdescription": "Synthetic maintenance record",
+          "apartment": "",
+          "class": "B"
+        }
+      ],
+      "pages": [
+        {
+          "source": "hpd_violations",
+          "provider": "mock",
+          "upstream_url": "https://data.cityofnewyork.us/resource/wvxf-dwi5.json?%24where=buildingid+%3D+123&%24order=violationid&%24limit=100&%24offset=0",
+          "page": 0,
+          "requested_at": "2026-10-26T06:40:32.250627+00:00",
+          "status": "ok",
+          "row_count": 1,
+          "retrieved_at": "2026-01-01T00:00:00+00:00"
+        }
+      ],
+      "status": "retrieved",
+      "complete": true,
+      "reason": "",
+      "match_field": "hpd_building_id",
+      "query_filter": "buildingid = 123"
+    },
+    {
+      "source_key": "hpd_complaints",
+      "provider": "mock",
+      "rows": [],
+      "pages": [
+        {
+          "source": "hpd_complaints",
+          "provider": "mock",
+          "upstream_url": "https://data.cityofnewyork.us/resource/ygpa-z7cr.json?%24where=building_id+%3D+123&%24order=problem_id&%24limit=100&%24offset=0",
+          "page": 0,
+          "requested_at": "2026-10-26T06:40:32.262059+00:00",
+          "status": "ok",
+          "row_count": 0,
+          "retrieved_at": "2026-01-01T00:00:00+00:00"
+        }
+      ],
+      "status": "no_records",
+      "complete": true,
+      "reason": "",
+      "match_field": "hpd_building_id",
+      "query_filter": "building_id = 123"
+    }
+  ]
+}

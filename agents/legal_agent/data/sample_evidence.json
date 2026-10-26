@@ -1,0 +1,126 @@
+{
+  "buildings": [
+    {
+      "address": "214 East 7th Street",
+      "borough": "Manhattan",
+      "bin": "1000001",
+      "bbl": "1003890024",
+      "unit": "4B",
+      "year_built": 1920,
+      "residential_units": 16
+    },
+    {
+      "address": "88-12 Roosevelt Avenue",
+      "borough": "Queens",
+      "bin": "4000002",
+      "bbl": "4012870033",
+      "unit": "2A",
+      "year_built": 1931,
+      "residential_units": 24
+    },
+    {
+      "address": "410 West 145th Street",
+      "borough": "Manhattan",
+      "bin": "1000003",
+      "bbl": "1020450012",
+      "unit": "6C",
+      "year_built": 1928,
+      "residential_units": 32
+    },
+    {
+      "address": "19 Pierrepont Street",
+      "borough": "Brooklyn",
+      "bin": "3000004",
+      "bbl": "3002500019",
+      "unit": "1",
+      "year_built": 1899,
+      "residential_units": 4
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "EV-HEAT-311-001",
+      "kind": "complaint",
+      "source": "NYC 311 (fictional sample)",
+      "date": "2026-01-12",
+      "description": "Tenant reported no heat in apartment 4B during the evening while outdoor temperature was below 55°F.",
+      "status": "open",
+      "building_address": "214 East 7th Street",
+      "metadata": {"service_request": "311-SR-1001", "issue": "heat"}
+    },
+    {
+      "evidence_id": "EV-HEAT-HPD-002",
+      "kind": "confirmed_violation",
+      "source": "HPD Notice of Violation (fictional sample)",
+      "date": "2026-01-14",
+      "description": "HPD inspector issued an open Class C heat violation after measuring apartment temperature below the required indoor minimum during Heat Season.",
+      "status": "open",
+      "violation_class": "C",
+      "statute_or_code": "NYC Admin. Code § 27-2029",
+      "building_address": "214 East 7th Street",
+      "metadata": {"nov_id": "HPD-NOV-2147", "issue": "heat"}
+    },
+    {
+      "evidence_id": "EV-HEAT-TENANT-003",
+      "kind": "tenant_report",
+      "source": "Tenant written statement (fictional sample)",
+      "date": "2026-01-15",
+      "description": "Tenant states radiators were cold from January 11–15 and landlord did not restore heat after a phone complaint.",
+      "status": "unverified",
+      "building_address": "214 East 7th Street",
+      "metadata": {"issue": "heat"}
+    },
+    {
+      "evidence_id": "EV-PEST-311-010",
+      "kind": "complaint",
+      "source": "NYC 311 (fictional sample)",
+      "date": "2026-02-02",
+      "description": "Tenant reported mice in kitchen cabinets at 88-12 Roosevelt Avenue, Apt 2A.",
+      "status": "open",
+      "building_address": "88-12 Roosevelt Avenue",
+      "metadata": {"service_request": "311-SR-2010", "issue": "pests"}
+    },
+    {
+      "evidence_id": "EV-PEST-311-011",
+      "kind": "complaint",
+      "source": "NYC 311 (fictional sample)",
+      "date": "2026-02-08",
+      "description": "Second 311 complaint for mice; HPD was unable to complete an inspection and no violation was issued.",
+      "status": "closed_no_access",
+      "building_address": "88-12 Roosevelt Avenue",
+      "metadata": {"service_request": "311-SR-2011", "issue": "pests"}
+    },
+    {
+      "evidence_id": "EV-PEST-HPD-020",
+      "kind": "confirmed_violation",
+      "source": "HPD Notice of Violation (fictional sample)",
+      "date": "2025-11-03",
+      "description": "HPD inspector issued an open Class C violation for mice/cockroaches in apartment 6C.",
+      "status": "open",
+      "violation_class": "C",
+      "statute_or_code": "NYC Admin. Code § 27-2017.4",
+      "building_address": "410 West 145th Street",
+      "metadata": {"nov_id": "HPD-NOV-4100", "issue": "pests"}
+    },
+    {
+      "evidence_id": "EV-PEST-311-021",
+      "kind": "complaint",
+      "source": "NYC 311 (fictional sample)",
+      "date": "2025-10-28",
+      "description": "311 complaint for cockroaches in apartment 6C, later associated with an HPD inspection.",
+      "status": "closed_inspected",
+      "building_address": "410 West 145th Street",
+      "metadata": {"service_request": "311-SR-3021", "issue": "pests"}
+    },
+    {
+      "evidence_id": "EV-WATER-TENANT-030",
+      "kind": "tenant_report",
+      "source": "Broker notes (fictional sample)",
+      "date": "2026-03-01",
+      "description": "Listing remarks mention occasional low water pressure. No 311 complaint or HPD violation is attached.",
+      "status": "unverified",
+      "building_address": "19 Pierrepont Street",
+      "metadata": {"issue": "water"}
+    }
+  ]
+}
