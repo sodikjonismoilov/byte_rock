@@ -1,5 +1,7 @@
 """Stateless boundary to the team Critic and World Model; no storage or transport."""
+import hashlib
 import importlib.util
+import json
 from pathlib import Path
 
 if __package__ and __package__.startswith("agents.legal_agent"):
@@ -76,6 +78,21 @@ def validate_reviewed_matches(evidence, identity, reviewed, *, budget=None):
     return result
 
 
+# Keys that only identify the row itself; they must not make two identical events look distinct.
+_ROW_ID_KEYS = {'ordernumber', 'order_number', 'unique_key'}
+
+
+def _event_signature(e):
+    """Hash of a record's content apart from its own identifiers (evidence_id if no raw record)."""
+    raw = e.metadata.get('raw_record')
+    if not isinstance(raw, dict) or not raw:
+        content = e.evidence_id  # unknown content: never collapse with another record
+    else:
+        content = json.dumps(sorted((str(k), str(v)) for k, v in raw.items()
+                                    if not str(k).lower().endswith('id') and str(k).lower() not in _ROW_ID_KEYS))
+    return hashlib.sha256(content.encode()).hexdigest()[:16]
+
+
 def review_records(evidence, building_card, *, budget=None):
     """Call unchanged root rules. Quarantine stays held; Matcher handles retries."""
     critic = root_critic()
@@ -85,7 +102,10 @@ def review_records(evidence, building_card, *, budget=None):
         if budget:budget.check()
         meta = e.metadata
         row = {k: meta[k] for k in ('bin', 'bbl', 'lat', 'lon', 'building_class', 'year_built', 'bridging_permit', 'corroborated', 'matcher_confidence') if k in meta}
-        row.update(record_id=e.evidence_id, dataset=datasets.get(meta.get('dataset'), meta.get('dataset', e.source)), address_raw=e.building_address or '', record_date=str(e.date) if e.date else '')
+        row.update(record_id=e.evidence_id, dataset=datasets.get(meta.get('dataset'), meta.get('dataset', e.source)), address_raw=e.building_address or '', record_date=(str(e.date) if e.date else '') + '|' + _event_signature(e))
+        # Root R5 treats equal dataset + record_date + address as one event. HPD cites many distinct
+        # violations per inspection, so the date carries a content signature: R5 now fires only on
+        # records identical apart from their ids. R4 reads just the year prefix, which is unchanged.
         # A missing Matcher confidence is unresolved, never implicitly trusted.
         row.setdefault('matcher_confidence', 0.0)
         entry = critic.review_link(row, building_card, pinned)

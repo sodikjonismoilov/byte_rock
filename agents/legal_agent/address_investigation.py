@@ -299,7 +299,7 @@ def investigate_address(provider,address,*,borough=None,unit=None,goals=(),regis
             'activity_log':activity,'retrievals':retrievals,'board_update':board,
             'limitations':['Data coverage applies to exact queried filters and retrieval time, not a complete history or independent inspection.',
                 'Paginated live datasets may change during a run; no transactional snapshot is promised.',
-                'R5 may hold distinct same-day records as collisions; held records cannot support published findings. No Critic rule was bypassed.',
+                'R5 holds records that are identical apart from their own IDs as possible duplicates; distinct same-day records are kept.',
                 'No safety, liability, apartment rent status or litigation-free certification is made. Court sources require manual verification.']}
     except (Exception,KeyboardInterrupt) as error:
         stopped=isinstance(error,ExecutionStopped)

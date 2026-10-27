@@ -77,6 +77,27 @@ def write_risk_report(report,output_dir):
     return output/'investigation_report.md'
 
 
+def verdict_section(report,text,link):
+    """Top-of-report verdict block; empty when the report predates the verdict layer."""
+    verdict=report.get('verdict')
+    if not verdict:return []
+    lines=['## Verdict','','**'+text(verdict.get('verdict'))+'**','']
+    for rule in verdict.get('rules_fired') or []:
+        urls=rule.get('source_urls') or []
+        refs=', '.join(link(e,urls[i] if i<len(urls) else None) for i,e in enumerate(rule.get('evidence_ids') or []))
+        lines.append('- **'+text(rule.get('level'))+'** ('+text(rule.get('rule_id'))+'): '+text(rule.get('summary'))+' Records: '+refs+'.')
+    if not verdict.get('rules_fired'):
+        reasons=(verdict.get('basis') or {}).get('not_enough_data_reasons') or []
+        lines.extend('- '+text(r) for r in reasons) if reasons else lines.append('- No verdict rule fired for the records and sources checked.')
+    unavailable=(verdict.get('basis') or {}).get('sources_unavailable') or []
+    disclaimer=verdict.get('disclaimer') or ''
+    # The disclaimer already names unavailable sources; add the note only if it does not.
+    if not unavailable or 'Sources not checked' not in disclaimer:
+        lines+=['','Sources not checked or incomplete: '+(', '.join(text(u) for u in unavailable) if unavailable else 'none reported')+'.']
+    lines+=['',text(disclaimer),'']
+    return lines
+
+
 def write_renter_report(report,output_dir):
     """Presentation only: render accepted facts and already publishable legal findings."""
     import html
@@ -104,6 +125,7 @@ def write_renter_report(report,output_dir):
     factual_only=not published
     address=(report.get('request') or {}).get('original_input') or identity.get('canonical_address') or 'Address not supplied'
     lines=['# Renter assessment','', '**'+status+(' — FACTUAL-ONLY ASSESSMENT' if factual_only else ' — REVIEWED RECORD ASSESSMENT')+'**','',
+        *verdict_section(report,text,link),
         '## Property overview','',text(address),
         '- Investigation date: '+text(report.get('generated_at')),
         '- Identity: '+text(identity.get('verification_status')),
@@ -168,7 +190,7 @@ def write_renter_report(report,output_dir):
     for caveat in unique(caveats):
         if caveat.startswith('Exact issuing_agency value '):continue  # Probe implementation detail remains in JSON.
         if caveat.startswith('Socrata internal :id '):caveat='Some permit queries used alternate pagination after a timeout; citations retain the original agency record IDs.'
-        if caveat.startswith('R5 may hold '):caveat='Some records remain held for unresolved same-day attribution collisions and cannot support published findings; see the detailed audit.'
+        if caveat.startswith('R5 holds '):caveat='Records that looked like exact duplicates of another record were held and not counted.'
         lines.append('- '+text(caveat))
     lines+=['- Next steps: check updated agency records and the status of listed items; obtain an independent inspection for current conditions. Use the agency or court references above for unavailable records and unit-specific questions.',
         '', '## Sources','',

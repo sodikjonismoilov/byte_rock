@@ -1,3 +1,5 @@
+> **Update:** integration.py now gives R5 a content signature, so distinct same-day records are no longer collapsed. critic.py is untouched; the owner's change described in this document is still the cleaner long-term fix.
+
 # Root Critic owner handoff — no teammate code modified
 
 Owner named in `critic-spec.md`: Crypto / Alif Cryptovan Sinaga. This document

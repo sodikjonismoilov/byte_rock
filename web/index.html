@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>SignSafe: is this NYC building okay to rent?</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/"><span class="mark" aria-hidden="true"></span>SignSafe</a>
+    <div class="top-right">
+      <span id="modePill" class="pill">starting…</span>
+      <button id="again" class="btn-ghost" type="button" hidden>New investigation</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="home" class="home">
+      <p class="eyebrow">NYC renter due diligence</p>
+      <h1>Is this building okay to rent?</h1>
+      <p class="lede">Seven specialists check the city’s own records, argue over which ones really belong to your building, and show every receipt.</p>
+
+      <form id="form" class="search" autocomplete="off">
+        <label class="field grow"><span>Street address</span>
+          <input id="address" required maxlength="200" placeholder="e.g. 840 Second Avenue" aria-describedby="formError"></label>
+        <label class="field"><span>Borough</span>
+          <select id="borough">
+            <option value="">Not sure</option><option>Manhattan</option><option>Brooklyn</option>
+            <option>Queens</option><option>Bronx</option><option>Staten Island</option>
+          </select></label>
+        <label class="field"><span>Unit <i>(optional)</i></span>
+          <input id="unit" maxlength="20" placeholder="4B"></label>
+        <button id="go" class="go" type="submit">Investigate</button>
+      </form>
+      <div class="modes" role="group" aria-label="Where the records come from">
+        <button type="button" class="seg" data-mode="sample" aria-pressed="false">Recorded demo</button>
+        <button type="button" class="seg" data-mode="live" aria-pressed="false">Live city data</button>
+        <span id="modeHint" class="hint"></span>
+      </div>
+      <p id="formError" class="error" role="alert" hidden></p>
+      <div id="cases" class="cases" hidden></div>
+
+      <ol id="crewIntro" class="crew-intro" aria-label="Meet the crew"></ol>
+    </section>
+
+    <section id="case" class="case" hidden>
+      <aside id="crew" class="crew" aria-label="The crew"></aside>
+
+      <div class="stage">
+        <div class="board" id="boardWrap">
+          <canvas id="board" aria-hidden="true"></canvas>
+          <div class="hud tl"><div id="hudAddr" class="addr"></div><div id="hudSub" class="hudsub"></div></div>
+          <div class="hud tr" id="counters"></div>
+          <div class="toasts" id="toasts" aria-live="polite"></div>
+        </div>
+        <div id="ledger" class="ledger" aria-label="Records examined"></div>
+        <div id="errorBox" class="error" role="alert" hidden></div>
+
+        <div id="result" hidden></div>
+
+        <details id="under" class="under">
+          <summary>Under the hood: the case file <span id="underCount"></span></summary>
+          <div class="under-body">
+            <div class="bar">
+              <label><input type="checkbox" id="onlyDecisions"> Show only decisions</label>
+              <span id="underMeta"></span>
+              <span id="downloads" class="dl"></span>
+            </div>
+            <div id="trace" class="trace" role="log" aria-label="Agent trace"></div>
+          </div>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="/static/app.js"></script>
+</body>
+</html>

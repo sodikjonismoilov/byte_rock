@@ -98,7 +98,7 @@ def investigate_property(provider: PropertyDataProvider, output_dir, *, workflow
         'An administrative or reporting violation does not itself establish an infestation, lack of heat, or another physical condition.',
     ]
     if any(entry['rule'] == 'R5' for entry in trace):
-        limitations.append('The unchanged team Critic R5 holds distinct same-day/address violation IDs as possible collisions; this is not proof they are duplicates, and those records do not support the published findings.')
+        limitations.append('R5 holds records that are identical apart from their own IDs as possible duplicates; distinct same-day records are kept. Held records do not support the published findings.')
     context = InvestigationContext(data_mode=mode, data_provider=provider.name, identity=identity,
         record_matches=matches, evidence=evidence, as_of=datetime.now(UTC).date(), notes=' '.join(limitations))
     result = (workflow or LegalResearchWorkflow(reasoning_mode=reasoning_mode)).run(task, context, budget=budget)

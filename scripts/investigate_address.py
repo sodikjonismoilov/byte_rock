@@ -15,6 +15,7 @@ from agents.legal_agent.risk_reporting import write_risk_report, write_renter_re
 from agents.legal_agent.events import ActivityTrace, JSONLEventSink, sanitize
 from agents.legal_agent.tools.execution import ExecutionBudget, ExecutionLimits, ExecutionStopped
 from agents.legal_agent.tools.address_data import DynamicNYCDevelopmentProvider, DynamicZetarisProvider, RecordedAddressProvider
+from agents.legal_agent.verdict import compute_verdict
 from agents.legal_agent.workflow import LegalResearchWorkflow
 
 
@@ -121,6 +122,12 @@ def run_investigation(args,*,provider_factory=None,workflow=None,load_configurat
             except Exception as error:
                 trace.emit('cleanup.failed',error_type=type(error).__name__)
                 if report:report.setdefault('limitations',[]).append('Provider cleanup failed; inspect the trace before another live run.')
+    # Deterministic verdict from accepted records and coverage; no model involved.
+    investigation_day=str(report.get('generated_at') or datetime.now(UTC).isoformat())[:10]
+    report['verdict']=compute_verdict(report,investigation_day,(report.get('request') or {}).get('unit'))
+    for rule in report['verdict']['rules_fired']:
+        trace.emit('verdict.rule_fired',rule_id=rule['rule_id'],level=rule['level'],evidence_ids=rule['evidence_ids'])
+    trace.emit('verdict.decided',verdict=report['verdict']['verdict'],rule_ids=[r['rule_id'] for r in report['verdict']['rules_fired']])
     from agents.legal_agent.integration import SharedInvestigationState
     shared=SharedInvestigationState(trace)
     board={**report['board_update'],'source_coverage':report.get('coverage',[])}

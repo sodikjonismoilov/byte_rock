@@ -79,10 +79,17 @@ def test_bounded_identity_cannot_claim_uniqueness():
     assert report['identity']['verification_status']=='ambiguous'
 
 
-def test_distinct_same_day_violations_remain_audited_and_r5_not_bypassed():
+def test_distinct_same_day_violations_are_both_kept():
     p=FixtureProvider({'hpd_buildings':[building()],'hpd_violations':[violation('1'),violation('2',novdescription='A different real-world condition would be separate')]})
     report=investigate_address(p,'1 Mock Street',borough='Manhattan')
     assert len(report['evidence_audit'])==2
+    assert not any(d['rule']=='R5' for d in report['record_decisions'])
+    assert len(report['factual_findings'])==2
+
+
+def test_same_day_violations_identical_apart_from_id_still_hit_r5():
+    p=FixtureProvider({'hpd_buildings':[building()],'hpd_violations':[violation('1',ordernumber='10'),violation('2',ordernumber='20')]})
+    report=investigate_address(p,'1 Mock Street',borough='Manhattan')
     assert any(d['rule']=='R5' for d in report['record_decisions'])
     assert len(report['factual_findings'])==1
     assert 'R5' in ' '.join(report['limitations'])

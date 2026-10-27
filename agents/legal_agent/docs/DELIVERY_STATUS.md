@@ -16,7 +16,7 @@
 - Exact historical extents are not claimed. Publisher scope descriptions/update frequencies are retained; paging exhaustion applies only to the current exact filter. Live datasets can change between offset pages.
 - General DOB NOW Build data excludes some specialty Electrical/Elevator/LAA records; FDNY coverage is the official FDNY subset of OATH, not all fire inspections.
 - HCR unit rent history and WebCivil Local/Supreme/NYSCEF remain manual-only. No court cases or unrestricted APIs were fabricated, no restrictions bypassed, and no de-identified statistics were attributed to an address.
-- R5 can falsely hold distinct same-day records. Source IDs remain in the audit; owner handoff/tests are documented and no root rule was changed or bypassed.
+- R5 holds records identical apart from their own IDs as possible duplicates; `integration.py` gives it a content signature so distinct same-day records are kept (see ROOT_CRITIC_HANDOFF.md). Source IDs remain in the audit and no root rule was changed or bypassed.
 - Legal applicability/version retrieval and live Nightshift model validation remain unverified. Deterministic planning/research/review is explicitly labelled. The report does not certify safety or liability.
 - Keeper must persist the emitted board projection in World Model; the team Conductor/Matcher/Reporter must connect their runtime and product-verdict policy. No competing memory database was created.
 

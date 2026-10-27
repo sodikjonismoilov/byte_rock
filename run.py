@@ -106,6 +106,8 @@ def main(argv=None) -> int:
         "provider": summary["provider"],
         "identity_status": summary["identity_status"],
         "factual_findings": len(report.get("factual_findings", [])),
+        "verdict": (report.get("verdict") or {}).get("verdict"),
+        "verdict_rules": [r["rule_id"] for r in (report.get("verdict") or {}).get("rules_fired", [])],
         "models_used": sorted({m["model"] for m in summary["model_activity"] if m.get("model")}),
         "run_dir": str(directory),
         "renter_report": str(directory / "renter_report.md"),
