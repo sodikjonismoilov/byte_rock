@@ -13,10 +13,13 @@ import {
 } from 'three';
 
 const VERDICT_COLORS = { walk: 0xe5534b, caution: 0xe8a93a, clear: 0x3fb8a0, nodata: 0x8d99ad };
-const MAX_LIVE = 38;       // cards on the board at once (pinned + held); older pinned cards are retired into the building
-const MAX_HELD = 10;       // held cards stay amber, but never crowd the board
-const SLOT_POOL = MAX_LIVE + 14;  // spare slots for cards still falling or retiring
-const ANCHOR = [0, 0.9, 1.05]; // where the strings start on the building
+const MAX_LIVE = 28;       // cards on the board at once (pinned + held); older pinned cards are retired into the building
+const MAX_HELD = 8;        // held cards stay dim, but never crowd the board
+const SLOT_POOL = 36;      // 2 sides x 3 columns x 6 rows: spare slots for cards still falling or retiring
+const CARD_W = 0.9, CARD_H = 0.58;
+const VIEW_Y = 1.0;        // the camera looks at the middle of the tower, roof included
+const ANCHOR = [0, 0.9, 1.05];
+const HELD_OPACITY = 0.5; // where the strings start on the building
 
 function hash(text) {
   let h = 2166136261;
@@ -80,7 +83,8 @@ export function createBoard(canvas, options = {}) {
 
   const scene = new Scene();
   const camera = new PerspectiveCamera(38, 1, 0.1, 80);
-  camera.position.set(0, 1.5, 10.5);
+  camera.position.set(0, 1.5, 12);
+  const view = { dist: 12, y: 1.5 };
   scene.add(new AmbientLight(0xbcc8e0, 0.85));
   const key = new DirectionalLight(0xffffff, 1.25); key.position.set(3, 6, 5); scene.add(key);
   const glow = new PointLight(0xffffff, 0, 14); glow.position.set(0, 1.2, 2.2); scene.add(glow);
@@ -99,9 +103,9 @@ export function createBoard(canvas, options = {}) {
   scene.add(tower);
 
   const ground = new Mesh(new CircleGeometry(5.6, 64), new MeshBasicMaterial({ color: 0x121a28, transparent: true, opacity: 0.9 }));
-  ground.rotation.x = -Math.PI / 2; ground.position.y = -1.6; scene.add(ground);
+  ground.rotation.x = -Math.PI / 2; ground.position.y = -1.8; scene.add(ground);
   const halo = new Mesh(new RingGeometry(2.1, 2.22, 64), new MeshBasicMaterial({ color: 0x3a4a68, transparent: true, opacity: 0.8, side: DoubleSide }));
-  halo.rotation.x = -Math.PI / 2; halo.position.y = -1.58; scene.add(halo);
+  halo.rotation.x = -Math.PI / 2; halo.position.y = -1.78; scene.add(halo);
 
   // drifting dust for depth
   const dustPositions = [];
@@ -118,13 +122,12 @@ export function createBoard(canvas, options = {}) {
   let pointer = { x: 0, y: 0 };
   let raf = 0, running = true, last = performance.now(), clock = 0;
 
+  // Cards hang in three columns either side of the tower, six rows each, alternating sides and staggered so
+  // neighbours rarely overlap. Outer columns sit a little further back.
   function slot(index) {
-    const ring = Math.floor(index / 12), j = index % 12;
-    const theta = (-0.5 + j / 11) * Math.PI * 1.5 + (ring % 2 ? 0.14 : 0);
-    const radius = 2.9 + ring * 0.8;
-    const y = -0.8 + ((j * 5 + ring * 3) % 12) / 12 * 3.5;
-    // wider than deep, and each outer ring sits further back so a full board still fits on screen
-    return [Math.sin(theta) * radius * 1.4, y, Math.cos(theta) * radius * 0.7 - 1.0 - ring * 1.3, theta];
+    const side = index % 2 ? 1 : -1, k = Math.floor(index / 2), col = Math.floor(k / 6), row = (k % 6) * 5 % 6;
+    const x = side * (1.85 + col * 1.3), y = -0.85 + row * 0.78 + (col % 2 ? 0.28 : 0);
+    return [x, y, 0.55 - col * 0.5, side * (0.15 + col * 0.12)];
   }
 
   function stringGeometry() {
@@ -133,10 +136,10 @@ export function createBoard(canvas, options = {}) {
     return g;
   }
   function updateString(card) {
-    const a = ANCHOR, b = [card.mesh.position.x, card.mesh.position.y + 0.32, card.mesh.position.z + 0.02];
+    const a = ANCHOR, b = [card.mesh.position.x, card.mesh.position.y + CARD_H / 2, card.mesh.position.z + 0.02];
     const attr = card.line.geometry.attributes.position;
     for (let i = 0; i < 9; i++) {
-      const t = i / 8, sag = Math.sin(Math.PI * t) * 0.28 * card.sag;
+      const t = i / 8, sag = Math.sin(Math.PI * t) * 0.22 * card.sag;
       attr.setXYZ(i, a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t - sag, a[2] + (b[2] - a[2]) * t);
     }
     attr.needsUpdate = true;
@@ -153,9 +156,9 @@ export function createBoard(canvas, options = {}) {
     const texture = new CanvasTexture(c); texture.colorSpace = SRGBColorSpace;
     const card = { id, dataset, slot: index, shortId: String(id).split(':').pop(), state: 'pending', texture, target: [x, y, z], sag: 1, age: 0 };
     drawCard(texture, card);
-    card.mesh = new Mesh(new PlaneGeometry(1.32, 0.85), new MeshBasicMaterial({ map: texture, transparent: true, side: DoubleSide }));
+    card.mesh = new Mesh(new PlaneGeometry(CARD_W, CARD_H), new MeshBasicMaterial({ map: texture, transparent: true, side: DoubleSide }));
     card.mesh.position.set(x, reduced ? y : -4.2, z + (reduced ? 0 : 2));
-    card.mesh.rotation.set(0, -theta * 0.38, (hash(id) - 0.5) * 0.12);
+    card.mesh.rotation.set(0, -theta, (hash(id) - 0.5) * 0.12);
     card.line = new Line(stringGeometry(), new LineBasicMaterial({ color: 0xe5534b, transparent: true, opacity: 0.85 }));
     updateString(card);
     scene.add(card.mesh); scene.add(card.line);
@@ -172,9 +175,14 @@ export function createBoard(canvas, options = {}) {
       }
     }
   }
+  function dropString(card) {
+    if (!card.line) return;
+    if (card.line.parent) scene.remove(card.line);
+    card.line.geometry.dispose(); card.line.material.dispose(); card.line = null;
+  }
   function retire(card) {
     card.state = 'retired'; live--;
-    if (card.line.parent) { scene.remove(card.line); card.line.geometry.dispose(); card.line.material.dispose(); }
+    dropString(card);
     card.fade = 1; retiring.add(card);
   }
   function removeCard(card) {
@@ -188,13 +196,14 @@ export function createBoard(canvas, options = {}) {
     card.state = state; drawCard(card.texture, card);
     if (state === 'accepted') card.target[2] += 0.25;
     if (state === 'held') {
-      card.line.material.color.set(0xe8a93a); card.line.material.opacity = 0.5; card.sag = 1.6;
+      dropString(card);   // held records are not pinned: no string, and dimmer than the pinned ones
+      card.mesh.material.opacity = HELD_OPACITY;
       let held = 0; for (const c of cards.values()) if (c.state === 'held') held++;
       if (held > MAX_HELD) retireOldest(['held']);
     }
     if (state === 'rejected') {
       live--;
-      scene.remove(card.line); card.line.geometry.dispose(); card.line.material.dispose();
+      dropString(card);
       card.vy = 1.6; card.spin = (hash(id) - 0.5) * 3; card.fade = 1; falling.add(card);
     }
   }
@@ -209,19 +218,24 @@ export function createBoard(canvas, options = {}) {
   function reset() {
     for (const card of cards.values()) {
       scene.remove(card.mesh); card.mesh.geometry.dispose(); card.mesh.material.dispose(); card.texture.dispose();
-      if (card.line.parent) { scene.remove(card.line); card.line.geometry.dispose(); card.line.material.dispose(); }
+      dropString(card);
     }
     cards.clear(); falling.clear(); retiring.clear(); freeSlots.length = 0; nextSlot = 0; live = 0; verdictColor = null;
     bodyMat.emissiveIntensity = 0; glow.intensity = 0; halo.material.color.set(0x3a4a68);
   }
 
+  // Frame the whole scene: the tower from ground to roof (about 7 units tall with margin) and the card columns
+  // (about 11 units wide), whichever needs the camera further back.
   function resize() {
     const box = canvas.parentElement.getBoundingClientRect();
-    const w = Math.max(280, box.width), h = Math.max(240, box.height);
+    const w = Math.max(280, box.width), h = Math.max(160, box.height);
     renderer.setSize(w, h, false); canvas.style.width = '100%'; canvas.style.height = '100%';
     camera.aspect = w / h;
-    camera.fov = w / h < 1.1 ? 52 : 38; // taller view on phones
+    camera.fov = 38;
     camera.updateProjectionMatrix();
+    const tan = Math.tan(camera.fov * Math.PI / 360);
+    view.dist = Math.max(7.4 / 2 / tan, 11.6 / 2 / (tan * camera.aspect));
+    view.y = VIEW_Y + 0.5;
   }
   const observer = new ResizeObserver(resize); observer.observe(canvas.parentElement); resize();
   canvas.parentElement.addEventListener('pointermove', (e) => {
@@ -237,8 +251,9 @@ export function createBoard(canvas, options = {}) {
     const sway = reduced ? 0 : 1;
     tower.rotation.y = Math.sin(clock * 0.35) * 0.22 * sway;
     camera.position.x += ((pointer.x * 0.9 + Math.sin(clock * 0.18) * 0.3 * sway) - camera.position.x) * 0.04;
-    camera.position.y += ((1.5 - pointer.y * 0.45) - camera.position.y) * 0.04;
-    camera.lookAt(0, 0.35, 0);
+    camera.position.y += ((view.y - pointer.y * 0.45) - camera.position.y) * 0.04;
+    camera.position.z += (view.dist - camera.position.z) * 0.12;
+    camera.lookAt(0, VIEW_Y, 0);
     dust.rotation.y += dt * 0.02 * sway;
 
     for (const card of cards.values()) {
@@ -247,7 +262,7 @@ export function createBoard(canvas, options = {}) {
       const m = card.mesh.position, t = card.target, k = reduced ? 1 : Math.min(1, dt * 5);
       m.x += (t[0] - m.x) * k; m.y += (t[1] - m.y) * k; m.z += (t[2] - m.z) * k;
       if (!reduced) card.mesh.rotation.z += (Math.sin(clock * 1.3 + card.age) * 0.012 - 0) * 0.02;
-      updateString(card);
+      if (card.line) updateString(card);
     }
     for (const card of [...falling]) {
       card.vy -= 9 * dt; card.mesh.position.y += card.vy * dt; card.mesh.position.z += dt * 0.6;

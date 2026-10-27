@@ -148,7 +148,7 @@ def test_critic_payload_reserves_space_without_dropping_claims_or_uncertainty(he
     from tools.llm import request_size
     assert request_size(CriticReport,payload)<=10000
     assert len(payload['draft']['findings'])==1 and payload['unresolved_questions']
-    assert payload['selection']['omitted_evidence_ids']
+    assert payload['selection']['records_not_shown']  # The Critic receives only cited rows; the rest stay in the registry.
     assert not payload['prior_findings']
 
 

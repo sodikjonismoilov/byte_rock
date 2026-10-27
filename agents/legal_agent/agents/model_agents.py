@@ -182,7 +182,8 @@ class ModelAgents:
         return draft
 
     def critique(self, task, context, draft, search_tool, reasoning_mode='llm'):
-        payload = agent_context(task,context,sources=[h.source for h in draft.retrieved_sources])
+        # The legal Critic only needs the records the draft actually cites; all others stay in the registry.
+        payload = agent_context(task,context,evidence_ids=draft.evidence_ids_used,sources=[h.source for h in draft.retrieved_sources])
         base_keys=set(payload)
         payload['role'] = 'independent_critic'
         payload['review_requirements']='Check support independently from the original excerpt, not the grounding flags or canonical ID. A narrowly attributed exact current-guidance quote is not a historical application; historical liability still needs independent operative-law/property verification. For a recoverable missing authority/citation issue, specify recommended_agent_or_tool=legal_search, recoverable=true and a concrete follow_up_query. Do not claim a legal search occurred unless an authority was supplied. Missing current/historical agency facts require request_external, not repetitive legal_search. Memory IDs can appear only in memory_ids; flag them as untrusted context, never evidence. Review only legal authority identity, quotation support, applicability and evidence-to-claim dependencies. Global source coverage, task scheduling and property matching belong to the global Planner and root Critic; preserve their decisions. Keep outputs compact.'
@@ -190,7 +191,7 @@ class ModelAgents:
             'findings':[compact_finding(f) for f in draft.findings],'evidence_ids_used':draft.evidence_ids_used,
             'retrieved_source_ids':[s['id'] for s in payload['authorities']],
             'caveats':draft.caveats,'reasoning_mode':draft.reasoning_mode}
-        payload=self._pack(task,context,payload,base_keys,sources=[h.source for h in draft.retrieved_sources])
+        payload=self._pack(task,context,payload,base_keys,evidence_ids=draft.evidence_ids_used,sources=[h.source for h in draft.retrieved_sources])
         report = self.adapter.complete(CriticReport,payload)
         if report.task_id != task.task_id:
             raise ExecutionStopped('Critic task mismatch')

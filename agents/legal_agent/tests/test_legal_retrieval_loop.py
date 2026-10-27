@@ -137,7 +137,8 @@ def test_relevance_keeps_contradictions_and_deduplicates_memory(heat_task,heat_c
     hint={'memory_id':'mem-2','summary':'Prior review gap','evidence_ids':[],'trust_label':'review_feedback_only'}
     heat_context.untrusted_memory=[hint,hint.copy()]
     payload=agent_context(heat_task,heat_context,max_bytes=16000)
-    assert payload['reconciliation']['conflicts'][0]['evidence_ids']==ids
+    assert payload['reconciliation']['conflict_groups'][0]['evidence_ids']==sorted(ids)
+    assert payload['reconciliation']['conflict_groups'][0]['pair_count']==1
     assert set(ids)<={e['evidence_id'] for e in payload['evidence']}
     assert len(payload['untrusted_memory'])==1
     assert 'mem-2' not in payload['reference_domains']['evidence_ids']

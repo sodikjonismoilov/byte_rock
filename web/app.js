@@ -22,6 +22,15 @@ function el(tag, attrs, ...kids) {
 const safeUrl = (u) => (typeof u === 'string' && /^https?:\/\//.test(u) ? u : null);
 const mmss = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
 const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
+// Record ids arrive URL-encoded ("%7C" for "|"). Show them decoded and never wrapped; long ones get a middle ellipsis.
+// The full raw id stays in the title so it can be copied or looked up.
+const displayId = (id) => { const t = String(id ?? '').replace(/%7C/gi, '|'); return t.length > 30 ? `${t.slice(0, 14)}…${t.slice(-13)}` : t; };
+const idCode = (id) => el('code', { class: 'rid', title: String(id ?? ''), text: displayId(id) });
+// Recorded status -> open / closed / other, for ordering and for the quiet card style.
+const CLOSED_RE = /\b(closed?|dismiss\w*|resolv\w*|signed[\s-]*off|complet\w*|rescind\w*|withdrawn|cured)\b/i;
+const OPEN_RE = /\b(open|active|nov sent out|not complied|no access|in violation)\b/i;
+const statusKind = (status) => (CLOSED_RE.test(status || '') ? 'closed' : OPEN_RE.test(status || '') ? 'open' : 'other');
+const PERMIT_DATASETS = new Set(['ipu4-2q9a', 'ic3t-wcy2', 'rbx6-tga4', 'w9ak-ipjd']);  // DOB permits and job filings (routine paperwork)
 
 const CREW = [
   { id: 'surveyor', name: 'Surveyor', role: 'Identity resolution', engine: 'rules', hue: 210, blurb: 'Works out exactly which building you mean (BBL, BIN, HPD id).' },
@@ -79,19 +88,23 @@ function renderCrewIntro() {
 
 function renderStation(id) {
   const c = CREW_BY_ID[id], st = S.crew[id];
-  const label = { waiting: 'waiting', working: 'working…', done: 'done', stopped: 'stopped', skipped: 'did not run' }[st.status];
-  const node = $(`#st-${id}`) || el('div', { class: 'station', id: `st-${id}` });
+  const label = { waiting: 'waiting', working: 'working', done: 'done', stopped: 'stopped', skipped: 'did not run' }[st.status];
+  const node = $(`#st-${id}`) || el('div', { class: 'station', id: `st-${id}`, role: 'listitem' });
   node.dataset.status = st.status;
-  node.replaceChildren(avatar(c), el('div', null,
-    el('div', { class: 'name', text: c.name }),
-    el('div', { class: 'role' }, c.role, engineTag(c)),
-    el('div', { class: 'status', text: label }),
-    st.note ? el('div', { class: 'note', text: st.note }) : null));
+  let note = st.note || c.blurb;
+  // Display only: the state value stays "Outcome: INCONCLUSIVE". With no model in the run there was nothing to conclude.
+  if (id === 'magistrate' && /^Outcome: INCONCLUSIVE/.test(st.note || '') && S.final && !S.final.models_used?.length) note = 'No AI model ran, so no legal conclusion.';
+  node.replaceChildren(
+    el('div', { class: 'strip' }, el('span', { text: 'SignSafe crew' }), el('span', { text: `No. ${String(CREW.indexOf(c) + 1).padStart(2, '0')}` })),
+    el('div', { class: 'who' },
+      el('div', { class: 'emblem', 'data-agent': c.id }, avatar(c)),
+      el('div', { class: 'ident' }, el('div', { class: 'name', text: c.name }), el('div', { class: 'role', title: c.role, text: c.role }), engineTag(c))),
+    el('div', { class: 'status' }, el('i', { class: 'dot', 'aria-hidden': 'true' }), label),
+    el('div', { class: `note${st.note ? '' : ' idle'}`, title: note, text: note }));
   return node;
 }
 function renderCrew() {
-  const rail = $('#crew');
-  rail.replaceChildren(el('h2', { text: 'The crew' }), ...CREW.map((c) => renderStation(c.id)));
+  $('#crew').replaceChildren(...CREW.map((c) => renderStation(c.id)));
 }
 function patchCrew(id, patch) {
   S.crew[id] = { ...S.crew[id], ...patch };
@@ -248,27 +261,65 @@ function renderCounters() {
   box.replaceChildren(
     pill('sources checked', c.total ? `${c.checked}/${c.total}` : '0'),
     pill('records pinned', String(S.warden.accepted)),
-    pill('rejected · held', `${S.warden.rejected} · ${S.warden.held}`),
+    pill('rejected', String(S.warden.rejected)),
+    pill('held for review', String(S.warden.held)),
     pill('model calls', String(S.modelCalls)),
     pill('elapsed', mmss(S.running ? (Date.now() - S.startedAt) / 1000 : S.elapsed || 0)));
 }
 let ledgerTimer = 0;
-function renderLedger() {  // coalesced: a burst of decisions redraws the chips once
+// Socrata dataset ids (VERIFIED_SOURCE_INVENTORY.md) -> what a renter would call the record. Unknown ids show as-is.
+const DATASET_LABELS = {
+  'kj4p-ruqc': 'HPD building', 'tesw-yqqr': 'HPD registration', 'feu5-w2e2': 'HPD registration contact', 'wvxf-dwi5': 'HPD violation',
+  'ygpa-z7cr': 'HPD complaint', 'eabe-havv': 'DOB complaint', '3h2n-5cm9': 'DOB violation', '6bgk-3dad': 'DOB ECB violation',
+  'ipu4-2q9a': 'DOB permit', 'ic3t-wcy2': 'DOB job filing', 'jz4z-kudi': 'OATH hearing', 'hcir-3275': 'HPD enforcement program (AEP)',
+  '6z8x-wfk4': 'Eviction', 'bzxi-2tsw': 'Harassment-certification list', '59kj-x8nc': 'HPD litigation', 'rbx6-tga4': 'DOB NOW permit',
+  'w9ak-ipjd': 'DOB NOW job filing',
+};
+// Critic rule ids -> plain English (critic-spec.md R1-R10; ROOT_CRITIC_HANDOFF.md for R5/R6). Unknown ids show as-is.
+const RULE_REASONS = {
+  R1: 'belongs to a different building (BBL mismatch)', R2: 'borough conflict', R3: 'recorded too far from this building',
+  R4: 'dated before the building was built', R5: 'duplicate of a record already kept', R6: 'address differs from this building',
+  R7: 'building class conflict', R8: 'low-confidence match, not corroborated', R9: 'no evidence cited', R10: 'cites a record that is not on the board',
+};
+const STATE_ICON = { accepted: '✓', rejected: '✗', held: '⏸' };
+const STATE_WORD = { accepted: 'kept', rejected: 'rejected', held: 'held' };
+function decisionLine(id, r) {
+  const dataset = String(id).split(':')[0];
+  const what = DATASET_LABELS[dataset] || String(id).replace(/%7C/gi, '|');
+  let why;
+  if (!r.rule) why = r.state === 'accepted' ? 'belongs to this building' : r.state === 'held' ? 'held for review' : 'rejected';
+  else if (r.rule === 'R8' && dataset === 'wvxf-dwi5') why = 'apartment-level record';
+  else why = RULE_REASONS[r.rule] || r.rule;
+  return `${what} · ${STATE_WORD[r.state]} · ${why}`;
+}
+function renderLedger() {  // coalesced: a burst of decisions redraws the ledger once
   if (ledgerTimer) return;
   ledgerTimer = setTimeout(() => { ledgerTimer = 0; drawLedger(); }, 150);
 }
+function clearLedger() {
+  for (const id of ['ledgerBar', 'ledgerLegend', 'ledgerLatest', 'ledgerList']) $(`#${id}`).replaceChildren();
+  $('#ledgerAllLabel').textContent = 'All 0 records'; $('#ledgerAll').open = false; $('#ledger').hidden = true;
+}
 function drawLedger() {
-  const box = $('#ledger');
   const all = [...S.records.entries()];
-  const items = all.slice(-160);
-  const earlier = all.length - items.length;
-  box.replaceChildren(
-    earlier > 0 ? el('span', { class: 'rec more', text: `… ${earlier} earlier records, all counted above` }) : null,
-    ...items.map(([id, r]) => {
-      const full = String(id).replace(/%7C/gi, '|');
-      const shown = full.length > 34 ? `${full.slice(0, 33)}…` : full;
-      return el('span', { class: `rec ${r.state}`, title: r.rule ? `${full} · rule ${r.rule}` : full, text: `${r.state === 'accepted' ? '✓' : r.state === 'rejected' ? '✗' : '⏸'} ${shown}` });
-    }));
+  $('#ledger').hidden = !all.length;
+  const { accepted: a, rejected: r, held: h } = S.warden, total = a + r + h;
+  const bar = $('#ledgerBar');
+  bar.setAttribute('aria-label', `${a} accepted, ${r} rejected, ${h} held for review`);
+  bar.replaceChildren(...[['accepted', a], ['rejected', r], ['held', h]].filter(([, n]) => n > 0)
+    .map(([state, n]) => el('span', { class: `seg-${state}`, style: `flex:${n} 1 0` })));
+  $('#ledgerLegend').replaceChildren(
+    el('span', { class: 'accepted' }, el('b', { text: String(a) }), ' accepted'),
+    el('span', { class: 'rejected' }, el('b', { text: String(r) }), ' rejected'),
+    el('span', { class: 'held' }, el('b', { text: String(h) }), ' held for review'));
+  $('#ledgerLatest').replaceChildren(...all.slice(-5).reverse().map(([id, rec]) =>
+    el('li', { class: rec.state, title: String(id).replace(/%7C/gi, '|') }, el('i', { 'aria-hidden': 'true', text: STATE_ICON[rec.state] }), decisionLine(id, rec))));
+  $('#ledgerAllLabel').textContent = `All ${total || all.length} records`;
+  const details = $('#ledgerAll');
+  if (!details.open) return;  // the long list is only built while someone is reading it
+  const list = $('#ledgerList'), top = list.scrollTop;
+  list.replaceChildren(...all.map(([id, rec]) => el('li', { class: rec.state, title: String(id).replace(/%7C/gi, '|') }, el('i', { 'aria-hidden': 'true', text: STATE_ICON[rec.state] }), decisionLine(id, rec))));
+  list.scrollTop = top;
 }
 function noteSampling() {
   const sub = $('#hudSub');
@@ -315,7 +366,7 @@ function resetRun() {
   Object.assign(S, { next: 0, fails: 0, sources: new Map(), sourcesTotal: new Set(), warden: { accepted: 0, rejected: 0, held: 0 }, records: new Map(), models: new Set(), modelCalls: 0, eventCount: 0, t0: null, queue: [], final: null, elapsed: 0, verdictLevel: null, acceptedSeen: 0, boardSampled: false, lastDecisionToast: 0, seenRules: new Set() });
   S.crew = Object.fromEntries(CREW.map((c) => [c.id, { status: 'waiting', note: '' }]));
   S.board?.reset();
-  $('#trace').replaceChildren(); $('#ledger').replaceChildren(); $('#toasts').replaceChildren();
+  $('#trace').replaceChildren(); clearLedger(); $('#toasts').replaceChildren(); $('#stage').classList.remove('done'); clearTimeout(S.presentTimer);
   $('#result').hidden = true; $('#result').replaceChildren(); $('#errorBox').hidden = true; $('#downloads').replaceChildren();
   $('#underCount').textContent = ''; $('#under').open = false;
   renderCrew(); renderCounters();
@@ -394,8 +445,33 @@ function finish(body) {
   setPill(r.data_mode === 'recorded_replay' ? 'sample' : 'live', r);
   drawLedger(); renderCounters(); renderResult(body); renderDownloads(body);
   $('#again').hidden = false;
-  setTimeout(() => $('#result').scrollIntoView({ behavior: 'smooth', block: 'start' }), 500);
+  presentResult();
 }
+
+// Run finished: the board shrinks to a strip (the scene keeps running) and the placard sits directly beneath it.
+function presentResult() {
+  const board = $('#boardWrap'), stage = $('#stage');
+  stage.classList.add('done');
+  clearTimeout(S.presentTimer);
+  let scrolled = false;
+  const reveal = () => {  // measure once the board has finished shrinking, so the scroll target is the final one
+    if (scrolled) return;
+    scrolled = true; clearTimeout(S.presentTimer); board.removeEventListener('transitionend', onEnd);
+    const card = $('#result .placard') || $('#result');
+    const top = card.getBoundingClientRect().top;
+    if (top < 0 || top > innerHeight * 0.55) window.scrollTo({ top: Math.max(0, top + scrollY - innerHeight * 0.38), behavior: 'smooth' });
+  };
+  const onEnd = (e) => { if (e.propertyName === 'height') reveal(); };
+  board.addEventListener('transitionend', onEnd);
+  S.presentTimer = setTimeout(reveal, 1200);  // no transition (reduced motion) or it never fired
+}
+
+// Developer-flavoured caveats from the report, matched by substring and shown in plain English. Anything else shows unchanged.
+const CAVEAT_PLAIN = [
+  ['R5 holds records that are identical apart from their own IDs', 'Records that look identical apart from their own IDs are treated as possible duplicates; distinct records from the same day are kept.'],
+  ['Paginated live datasets may change during a run', 'City data can change while a run is in progress, so this is not a snapshot.'],
+];
+const plainCaveat = (x) => (CAVEAT_PLAIN.find(([key]) => String(x).includes(key)) || [])[1] || String(x);
 
 const placeOf = (r) => [r.address || S.address, r.borough].filter(Boolean).join(', ');
 
@@ -409,7 +485,7 @@ function renderResult(body) {
 
   const rules = (v?.rules_fired || []).map((rule) => el('li', { 'data-level': rule.level },
     el('b', { text: `${rule.rule_id} · ${rule.level}` }), ' ', rule.summary || '',
-    el('div', null, ...(rule.evidence_ids || []).map((id) => el('code', { text: id })), ' ',
+    el('div', null, ...(rule.evidence_ids || []).map((id) => idCode(id)), ' ',
       ...(rule.source_urls || []).filter(safeUrl).slice(0, 3).map((u, i) => el('a', { href: u, target: '_blank', rel: 'noopener', text: `record ${i + 1} ↗` }), ' '))));
   const reasons = v?.basis?.not_enough_data_reasons || [];
   const cov = v?.basis?.coverage;
@@ -419,6 +495,14 @@ function renderResult(body) {
   const titleOf = new Map((r.coverage || []).map((c) => [c.source, c.title || c.source]));
   const partial = (Array.isArray(v?.basis?.partial_sources) ? v.basis.partial_sources : []).map((k) => titleOf.get(k) || String(k));
 
+  // Source ids in agency prose ("Sources not checked: fdny_oath") become the titles the coverage list carries.
+  const humanSources = (text) => String(text).replace(/\b[a-z][a-z0-9]*(?:_[a-z0-9]+)+\b/g, (id) => titleOf.get(id) || id);
+  const tryLine = v?.verdict === 'NOT ENOUGH DATA'
+    ? (r.data_mode === 'recorded_replay' ? 'This offline replay only knows 1 Mock Street. Switch to Live city data.'
+      : r.identity_status !== 'verified' ? 'We couldn’t match this to one building. Check the borough and the spelling.'
+      : 'Some sources couldn’t be reached. Running it again sometimes helps.')
+    : null;
+
   const placard = el('article', { class: 'placard', 'data-level': info?.level || 'none' },
     el('header', null, el('span', { text: 'NYC renter inspection' }), el('span', { text: `Case ${String(r.run_id).slice(0, 8)}` })),
     el('div', { class: 'place', text: place }),
@@ -426,8 +510,9 @@ function renderResult(body) {
     el('p', { class: 'vline', text: info ? info.line : 'This build has no verdict rules installed, so you are looking at the checked records without a rating.' }),
     rules.length ? el('ul', { class: 'rules' }, rules) : null,
     reasons.length ? el('ul', { class: 'rules' }, reasons.map((x) => el('li', { 'data-level': 'NOTE', text: String(x) }))) : null,
+    tryLine ? el('p', { class: 'try' }, el('b', { text: 'Try: ' }), tryLine) : null,
     also.length ? el('div', { class: 'also' }, el('h4', { text: 'Also on record' }), el('ul', null, also.map((x) => el('li', { text: String(x) })))) : null,
-    el('footer', null, covText, v?.disclaimer || 'Not a safety guarantee. Based only on recorded agency data; missing data is not good news.',
+    el('footer', null, covText, humanSources(v?.disclaimer || 'Not a safety guarantee. Based only on recorded agency data; missing data is not good news.'),
       partial.length ? el('div', { text: `Some results were truncated (${partial.join(', ')}), so counts may be higher than shown.` }) : null,
       r.data_mode === 'recorded_replay' ? el('div', { text: 'Data source: recorded replay (not live agency data).' }) : null));
 
@@ -438,18 +523,27 @@ function renderResult(body) {
     groups.get(key).push(f);
   }
   const isCounted = (f) => (f.evidence_ids || []).some((id) => counted.has(id));
-  const rank = (f) => [isCounted(f) ? 0 : 1, /open/i.test(f.recorded_status || '') ? 0 : 1, SEV_RANK[String(f.severity || '').toUpperCase()] ?? 3];
+  const rank = (f) => [isCounted(f) ? 0 : 1, { open: 0, other: 1, closed: 2 }[statusKind(f.recorded_status)], SEV_RANK[String(f.severity || '').toUpperCase()] ?? 3];
   const byRank = (a, b) => { const x = rank(a), y = rank(b); for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return x[i] - y[i]; return String(b.event_date || '').localeCompare(String(a.event_date || '')); };
   const ordered = [...groups.entries()].map(([key, list]) => [key, [...list].sort(byRank)])
     .sort((a, b) => (QUIET_GROUPS.has(a[0]) - QUIET_GROUPS.has(b[0])) || ((GROUP_ORDER.indexOf(a[0]) + 99) % 99 - (GROUP_ORDER.indexOf(b[0]) + 99) % 99) || b[1].length - a[1].length);
   const SHOW = 12;
-  const groupNode = ([key, list]) => {
+  const cardsOf = (list) => {  // first SHOW cards, then the rest behind a "Show the other N" fold
     const cards = list.map((f) => findingCard(f, isCounted(f)));
-    const head = `${prettyKey(key)} · ${list.length}`;
-    const body = el('div', { class: 'finds' }, cards.slice(0, SHOW));
     const rest = cards.length > SHOW ? el('details', { class: 'more' }, el('summary', { text: `Show the other ${cards.length - SHOW}` }), el('div', { class: 'finds' }, cards.slice(SHOW))) : null;
-    if (QUIET_GROUPS.has(key)) return el('details', { class: 'group quiet' }, el('summary', { text: head }), body, rest);
-    return el('div', { class: 'group' }, el('h3', { text: head }), body, rest);
+    return [el('div', { class: 'finds' }, cards.slice(0, SHOW)), rest];
+  };
+  const isRoutine = (f) => (PERMIT_DATASETS.has(f.dataset) || f.kind === 'permit') && !isCounted(f);
+  const groupNode = ([key, list]) => {
+    // Building safety: violations first; routine permits and job filings fold into their own sub-group below them.
+    const routine = key === 'building_safety' ? list.filter(isRoutine) : [];
+    const main = routine.length ? list.filter((f) => !isRoutine(f)) : list;
+    const open = main.filter((f) => statusKind(f.recorded_status) === 'open').length, closed = main.filter((f) => statusKind(f.recorded_status) === 'closed').length;
+    const tail = open + closed ? ` · ${open} open · ${closed} closed` : '';
+    const head = `${prettyKey(key)} · ${main.length || list.length}${tail}`;
+    const permits = routine.length ? el('details', { class: 'group quiet permits' }, el('summary', { text: `Permits and filings · ${routine.length}` }), ...cardsOf(routine)) : null;
+    if (QUIET_GROUPS.has(key)) return el('details', { class: 'group quiet' }, el('summary', { text: head }), ...cardsOf(main), permits);
+    return el('div', { class: 'group' }, el('h3', { text: head }), ...(main.length ? cardsOf(main) : []), permits);
   };
   // Apartment-level records the Critic holds (R8, no unit requested) but the verdict counts. Optional field.
   const apt = v?.basis?.apartment_level, aptRecords = Array.isArray(apt?.records) ? apt.records : [];
@@ -471,7 +565,9 @@ function renderResult(body) {
 
   const buckets = { retrieved: [], no_records: [], manual_only: [], unavailable: [] };
   for (const c of r.coverage || []) (buckets[c.status] || buckets.unavailable).push(c);
-  const srcRow = (c, s) => el('div', { class: 'src', 'data-s': s, title: c.reason || '' }, el('span', { text: c.title || c.source }), el('span', { class: 'st', text: s === 'retrieved' ? `${c.records_returned ?? ''} found` : s === 'no_records' ? 'none found' : s === 'manual_only' ? 'CHECK MANUALLY' : 'COULD NOT CHECK' }));
+  buckets.retrieved.sort((a, b) => (b.records_returned || 0) - (a.records_returned || 0));
+  const srcRow = (c, s) => el('div', { class: 'src', 'data-s': s, title: c.reason || '' }, el('span', { class: 'nm', text: c.title || c.source }),
+    el('span', { class: 'st' }, s === 'retrieved' ? [el('b', { text: String(c.records_returned ?? '') }), ' found'] : s === 'no_records' ? 'none found' : s === 'manual_only' ? 'CHECK MANUALLY' : 'COULD NOT CHECK'));
   const checked = el('section', { class: 'card' }, el('h2', { text: 'What we checked' }),
     el('p', { class: 'sub', text: 'Every source is listed, including the ones we could not reach. Unchecked is unknown, never safe.' }),
     el('div', { class: 'checked-grid' }, buckets.retrieved.map((c) => srcRow(c, 'retrieved')), buckets.no_records.map((c) => srcRow(c, 'no_records')), buckets.manual_only.map((c) => srcRow(c, 'manual_only')), buckets.unavailable.map((c) => srcRow(c, 'unavailable'))));
@@ -481,39 +577,60 @@ function renderResult(body) {
   const glance = el('section', { class: 'card' }, el('h2', { text: 'At a glance' }),
     el('div', { class: 'stats' },
       stat('sources checked', total ? `${ok} of ${total}` : '–'),
-      stat(aptRecords.length ? 'records kept (building\u2011level)' : 'records kept', String(r.findings?.length ?? 0)),
-      stat('rejected · held by the Warden', `${S.warden.rejected} · ${S.warden.held}`),
-      stat(r.models_used?.length ? 'AI model used' : 'reasoning', r.models_used?.length ? shortModel(r.models_used[0]) : 'deterministic')),
-    r.limitations?.length ? el('div', { class: 'group' }, el('h3', { text: 'Caveats' }), el('div', { class: 'note-box' }, r.limitations.slice(0, 4).map((x) => el('p', { text: x })))) : null);
+      stat('records about this building', String(r.findings?.length ?? 0)),
+      stat('rejected by the Warden', String(S.warden.rejected)),
+      stat('held for review', String(S.warden.held)),
+      stat('decided by', 'fixed rules'),
+      stat('model calls', String(S.modelCalls))),
+    r.limitations?.length ? el('details', { class: 'group quiet caveats' }, el('summary', { text: `Caveats (${r.limitations.length})` }), el('div', { class: 'note-box' }, r.limitations.map((x) => el('p', { text: plainCaveat(x) })))) : null);
 
   const wrap = $('#result');
   wrap.replaceChildren(el('div', { class: 'placard-wrap' }, placard, glance), evidence, checked);
   wrap.hidden = false;
 }
 
-// Agency text arrives as "novdescription: ALL CAPS SENTENCE": drop the field label, and show shouty text in sentence case.
-function readable(raw) {
-  const original = String(raw ?? '');
-  const text = original.replace(/^\s*[a-z][a-z0-9_]*:\s+(?=\S)/, '');
-  if (text.length > 12 && !/[a-z]/.test(text) && /[A-Z]/.test(text)) {
-    return { text: text.toLowerCase().replace(/(^\s*|[.!?]\s+)([a-z])/g, (m, lead, ch) => lead + ch.toUpperCase()), title: text };
+// Agency text arrives as "novdescription: ALL CAPS SENTENCE; job_type: A2; work_type: Plumbing". Drop the field labels and the
+// machine-only fields, keep work_type / filing_reason / violation_type as a quiet second line, and show shouty text in sentence case.
+const KEEP_KEYS = new Set(['work_type', 'filing_reason', 'violation_type']);
+const KEY_VALUE = /^\s*([a-z][a-z0-9_]*):\s+(?=\S)/;
+const sentenceCase = (text) => (text.length > 12 && !/[a-z]/.test(text) && /[A-Z]/.test(text)
+  ? text.toLowerCase().replace(/(^\s*|[.!?]\s+)([a-z])/g, (m, lead, ch) => lead + ch.toUpperCase()) : text);
+function cleanDescription(raw) {
+  let main = '';
+  const keep = [];
+  String(raw ?? '').split(/;\s+(?=[a-z][a-z0-9_]*:\s)/).forEach((part, i) => {
+    const m = part.match(KEY_VALUE);
+    const value = (m ? part.slice(m[0].length) : part).replace(/\s+/g, ' ').trim();
+    if (m && KEEP_KEYS.has(m[1])) { if (value) keep.push(sentenceCase(value)); }
+    else if (i === 0) main = sentenceCase(value);
+  });
+  if (main.length > 220) {
+    const cut = main.slice(0, 220), space = cut.lastIndexOf(' ');
+    main = `${(space > 120 ? cut.slice(0, space) : cut).replace(/[\s,;:.\-–]+$/, '')}…`;
   }
-  return { text, title: '' };
+  return { text: main, meta: [...new Set(keep)].join(' · ') };
 }
 
 function findingCard(f, isCounted, apartment) {
   const cls = String(f.severity || '').toUpperCase();
-  const body = readable(String(f.description || f.kind || 'Agency record').slice(0, 260));
+  const kind = statusKind(f.recorded_status);
+  const quiet = kind === 'closed' && !isCounted;
+  const raw = String(f.description || '');
+  const body = cleanDescription(raw);
+  const text = body.text || DATASET_LABELS[f.dataset] || prettyKey(f.kind || 'agency record');
   const link = safeUrl(f.source_url);
-  return el('article', { class: `find${isCounted ? ' counted' : ''}` },
+  const word = /dismiss/i.test(f.recorded_status) ? 'dismissed' : /signed/i.test(f.recorded_status) ? 'signed off' : 'closed';
+  const loud = cls && !quiet && (cls === 'B' || cls === 'C');  // only open Class B/C get the colored chip
+  return el('article', { class: `find${isCounted ? ' counted' : ''}${quiet ? ' quiet' : ''}`, title: raw || null },
     isCounted ? el('span', { class: 'badge-counted', text: 'COUNTED' }) : null,
     el('div', { class: 'row' },
-      cls ? el('span', { class: `chip ${cls.toLowerCase()}`, text: `Class ${cls}` }) : null,
-      f.recorded_status ? el('span', { class: `chip ${/open/i.test(f.recorded_status) ? 'open' : ''}`, text: String(f.recorded_status).toUpperCase() }) : null,
+      cls ? el('span', { class: `chip ${loud ? cls.toLowerCase() : quiet ? 'quiet' : ''}`, title: quiet ? String(f.recorded_status) : null, text: quiet ? `Class ${cls} · ${word}` : `Class ${cls}` }) : null,
+      f.recorded_status && !(quiet && cls) ? el('span', { class: `chip${kind === 'open' ? ' open' : quiet ? ' quiet' : ''}`, text: String(f.recorded_status).toUpperCase() }) : null,
       f.event_date ? el('span', { class: 'chip', text: String(f.event_date).slice(0, 10) }) : null,
       apartment ? el('span', { class: 'chip apt', text: `Apt ${apartment}` }) : null),
-    el('p', body.title ? { text: body.text, title: body.title } : { text: body.text }),
-    el('div', { class: 'evid' }, el('span', null, f.agency ? `${String(f.agency).replace(/^Department of /, '')} · ` : '', el('code', { text: (f.evidence_ids || [])[0] || f.finding_id })),
+    el('p', { text }),
+    body.meta ? el('div', { class: 'meta', text: body.meta }) : null,
+    el('div', { class: 'evid' }, el('span', null, f.agency ? `${String(f.agency).replace(/^Department of /, '')} · ` : '', idCode((f.evidence_ids || [])[0] || f.finding_id)),
       link ? el('a', { href: link, target: '_blank', rel: 'noopener', text: 'View city record ↗' }) : null));
 }
 
@@ -525,6 +642,7 @@ function renderDownloads(body) {
 }
 
 /* ---------- home ---------- */
+const REAL_BUILDINGS = ['686 3 AVENUE', '840 2 AVENUE', '150 EAST 44 STREET', '337 EAST 49 STREET'];  // all Manhattan; known to have HPD records
 function setPill(kind, r) {
   const pill = $('#modePill');
   pill.className = `pill ${kind}`;
@@ -554,12 +672,16 @@ async function boot() {
   renderCrewIntro();
   try { S.cfg = await (await fetch('/api/config')).json(); } catch (error) { S.cfg = { default_mode: 'sample', cases: [] }; }
   setMode(S.cfg.default_mode === 'live' ? 'live' : 'sample');
+  const real = $('#realCases');
+  real.replaceChildren('Try a real building:', ...REAL_BUILDINGS.map((address) => el('button', { type: 'button', class: 'chip-btn', onclick: () => {
+    $('#address').value = address; $('#borough').value = 'Manhattan'; setMode('live');  // fills the form; the person still presses Investigate
+  } }, address)));
   if (S.cfg.cases?.length) {
     const box = $('#cases'); box.hidden = false;
-    box.replaceChildren('Try a sample case:', ...S.cfg.cases.map((c) => el('button', { type: 'button', class: 'chip-btn', onclick: () => {
+    box.replaceChildren('Or an offline sample:', ...S.cfg.cases.map((c) => el('button', { type: 'button', class: 'chip-btn', onclick: () => {
       $('#address').value = c.address; $('#borough').value = c.borough || ''; $('#unit').value = c.unit || '';
       setMode('sample'); startRun({ address: c.address, borough: c.borough || '', unit: c.unit || '', mode: 'sample' });
-    } }, c.label || c.address, el('small', { text: 'recorded demo' }))));
+    } }, `Offline replay · ${c.label || c.address}`)));
   }
   document.querySelectorAll('.seg').forEach((b) => b.addEventListener('click', () => setMode(b.dataset.mode)));
   $('#form').addEventListener('submit', submitForm);
@@ -567,6 +689,7 @@ async function boot() {
     S.job = null; $('#case').hidden = true; $('#home').hidden = false; $('#again').hidden = true; $('#address').focus();
     setPill(S.mode === 'sample' ? 'sample' : 'live');
   });
+  $('#ledgerAll').addEventListener('toggle', drawLedger);
   $('#onlyDecisions').addEventListener('change', (e) => $('#trace').classList.toggle('only', e.target.checked));
 }
 boot();
