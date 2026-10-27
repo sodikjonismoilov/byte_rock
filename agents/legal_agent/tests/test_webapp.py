@@ -100,3 +100,52 @@ assert [e["type"] for e in events] == ["b"] and nxt == 2
 capped = webapp._cap({"blob": "x" * 10000})
 assert capped["_truncated"] is True and len(json.dumps(capped)) < 1000
 ''' % str(tmp_path / "trace_dir"), tmp_path)
+
+def test_result_details_carry_the_ai_reviewers_output_capped_and_only_when_present(tmp_path):
+    run_child('''
+folder = Path(%r)
+folder.mkdir(parents=True, exist_ok=True)
+long = "x" * 900
+issue = lambda n: {"code": "VIOLATION_STATUS_UNVERIFIED", "message": long, "evidence_ids": ["wvxf-dwi5:" + str(n)], "follow_up_query": "secret-looking", "required_correction": "dropped"}
+report = {
+    "identity": {"canonical_address": "1 A ST", "borough": "MANHATTAN"},
+    "legal_assessment": {
+        "status": "inconclusive", "critic_outcome": "INCONCLUSIVE",
+        "plans": [{"questions": ["q1", "q2"]}, {"questions": ["q3"]}],
+        "findings": [{"finding_id": "fnd-%%d" %% n, "summary": long + "\\x1b[31m\\x00", "evidence_ids": ["wvxf-dwi5:1"] if n %% 2 else [], "sufficiency": "partial",
+                      "missing_information": [long] * 9, "registration_contacts": [{"name": "must not leak"}]} for n in range(9)],
+        "review_history": [{"outcome": "REVISE", "issues": [issue(0)], "revision_instructions": ["old"]},
+                           {"outcome": "INCONCLUSIVE", "issues": [issue(n) for n in range(9)], "revision_instructions": [long] * 6}],
+    },
+    "board_update": {"legal_findings": []},
+    "registration_contacts": [{"name": "must not leak"}],
+}
+(folder / "investigation_report.json").write_text(json.dumps(report))
+legal = webapp._result_details(folder)["legal"]
+assert set(legal) == {"status", "critic_outcome", "reviews", "published", "planner_questions", "observation_total", "observations_cited",
+                      "observations", "critic_issues", "follow_ups"}, sorted(legal)
+assert legal["published"] == 0 and legal["reviews"] == 2 and legal["planner_questions"] == 3
+assert legal["status"] == "inconclusive" and legal["critic_outcome"] == "INCONCLUSIVE"
+assert legal["observation_total"] == 9 and legal["observations_cited"] == 4 and len(legal["observations"]) == 6
+assert set(legal["observations"][0]) == {"finding_id", "summary", "evidence_ids", "sufficiency", "missing_information"}
+assert all(len(o["summary"]) == 400 and "\\x1b" not in o["summary"] and "\\x00" not in o["summary"] for o in legal["observations"])
+assert all(len(m) == 400 for o in legal["observations"] for m in o["missing_information"]) and len(legal["observations"][0]["missing_information"]) == 6
+assert len(legal["critic_issues"]) == 6 and set(legal["critic_issues"][0]) == {"code", "message", "evidence_ids"}
+assert all(len(i["message"]) == 400 for i in legal["critic_issues"])
+assert len(legal["follow_ups"]) == 4 and all(len(f) == 400 for f in legal["follow_ups"])  # the LAST review's, not the first's
+assert "must not leak" not in json.dumps(webapp._result_details(folder)["legal"]) and "secret-looking" not in json.dumps(legal)
+
+report["board_update"] = {"legal_findings": [{"finding_id": "fnd-1"}, {"finding_id": "fnd-2"}]}
+(folder / "investigation_report.json").write_text(json.dumps(report))
+assert webapp._result_details(folder)["legal"]["published"] == 2
+
+report["legal_assessment"]["reasoning_mode"] = "demo_deterministic"  # scripted reviewers: no AI ran, so nothing to show
+(folder / "investigation_report.json").write_text(json.dumps(report))
+assert webapp._result_details(folder)["legal"] is None
+report["legal_assessment"]["reasoning_mode"] = "llm:meterless"
+(folder / "investigation_report.json").write_text(json.dumps(report))
+assert webapp._result_details(folder)["legal"] is not None
+del report["legal_assessment"]
+(folder / "investigation_report.json").write_text(json.dumps(report))
+assert webapp._result_details(folder)["legal"] is None
+''' % str(tmp_path / "legal_report"), tmp_path)

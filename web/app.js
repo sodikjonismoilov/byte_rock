@@ -26,6 +26,11 @@ const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 // The full raw id stays in the title so it can be copied or looked up.
 const displayId = (id) => { const t = String(id ?? '').replace(/%7C/gi, '|'); return t.length > 30 ? `${t.slice(0, 14)}…${t.slice(-13)}` : t; };
 const idCode = (id) => el('code', { class: 'rid', title: String(id ?? ''), text: displayId(id) });
+// Model-written text is untrusted: control characters out, and it only ever reaches the page through el() as text nodes.
+const cleanText = (t) => String(t ?? '').replace(/[\u0000-\u001f\u007f-\u009f]+/g, ' ').trim();
+// Critic issue codes -> plain English. Unknown codes show as-is, in sentence case.
+const ISSUE_PLAIN = { VIOLATION_STATUS_UNVERIFIED: 'Violation status not verified' };
+const issuePlain = (code) => { const c = cleanText(code); return ISSUE_PLAIN[c] || c.toLowerCase().replace(/_/g, ' ').replace(/^./, (x) => x.toUpperCase()); };
 // Recorded status -> open / closed / other, for ordering and for the quiet card style.
 const CLOSED_RE = /\b(closed?|dismiss\w*|resolv\w*|signed[\s-]*off|complet\w*|rescind\w*|withdrawn|cured)\b/i;
 const OPEN_RE = /\b(open|active|nov sent out|not complied|no access|in violation)\b/i;
@@ -112,6 +117,9 @@ function renderStation(id) {
   let note = st.note || c.blurb;
   // Display only: the state value stays "Outcome: INCONCLUSIVE". With no model in the run there was nothing to conclude.
   if (id === 'magistrate' && /^Outcome: INCONCLUSIVE/.test(st.note || '') && S.final && !S.final.models_used?.length) note = 'No AI model ran, so no legal conclusion.';
+  const legal = S.final?.legal;  // what the reviewers produced (null for deterministic runs and replays)
+  if (legal && id === 'bloodhound') note = `${legal.observations_cited ?? 0} cited ${legal.observations_cited === 1 ? 'observation' : 'observations'} (AI-written)`;
+  if (legal && id === 'magistrate' && /^Outcome: INCONCLUSIVE/.test(st.note || '')) note = legal.critic_issues?.length ? `Would not sign off: ${issuePlain(legal.critic_issues[0].code)}` : 'Would not sign off';
   node.replaceChildren(
     el('div', { class: 'strip' }, el('span', { text: 'SignSafe crew' }), el('span', { text: `No. ${String(CREW.indexOf(c) + 1).padStart(2, '0')}` })),
     el('div', { class: 'who' },
@@ -604,8 +612,50 @@ function renderResult(body) {
     r.limitations?.length ? el('details', { class: 'group quiet caveats' }, el('summary', { text: `Caveats (${r.limitations.length})` }), el('div', { class: 'note-box' }, r.limitations.map((x) => el('p', { text: plainCaveat(x) })))) : null);
 
   const wrap = $('#result');
-  wrap.replaceChildren(el('div', { class: 'placard-wrap' }, placard, glance), evidence, checked);
+  wrap.replaceChildren(el('div', { class: 'placard-wrap' }, placard, glance), r.legal ? legalSection(r.legal, evidence) : null, evidence, checked);
   wrap.hidden = false;
+}
+
+// "What the AI reviewers did": the Pathfinder / Bloodhound / Magistrate output from legal_assessment, shown as unverified AI text.
+function legalSection(L, evidence) {
+  const cardById = new Map();  // evidence id -> its card in the evidence list, so a chip can jump to it
+  for (const card of evidence.querySelectorAll('.find')) for (const code of card.querySelectorAll('.rid')) cardById.set(code.title, card);
+  const chip = (id) => {
+    const node = idCode(cleanText(id)), card = cardById.get(cleanText(id));
+    if (!card) return node;  // no matching card: the chip stays plain
+    const go = () => {
+      for (let n = card.parentElement; n; n = n.parentElement) if (n.tagName === 'DETAILS') n.open = true;
+      card.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+      card.classList.add('ping'); setTimeout(() => card.classList.remove('ping'), 1800);
+    };
+    node.classList.add('jump'); node.setAttribute('role', 'button'); node.tabIndex = 0;
+    node.addEventListener('click', go); node.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+    return node;
+  };
+  const chips = (ids) => (ids || []).length ? el('div', { class: 'idchips' }, ids.map(chip)) : null;
+  const outcome = cleanText(L.critic_outcome).toUpperCase(), published = L.published || 0, cited = L.observations_cited ?? 0;
+  const summary = [`Pathfinder planned ${plural(L.planner_questions || 0, 'question')}`, `Bloodhound returned ${cited} cited ${cited === 1 ? 'observation' : 'observations'}`,
+    `Magistrate: ${outcome || 'no outcome'}${L.reviews ? ` after ${plural(L.reviews, 'review')}` : ''}`, `${published} published`].join(' · ');
+  const total = L.observation_total ?? (L.observations || []).length;
+  const left = el('div', { class: 'legal-col' },
+    el('h3', null, published ? 'Published findings' : 'Bloodhound’s observations', published ? null : el('span', { class: 'quiet-tag', text: 'AI-written · not verified · not published' })),
+    ...(L.observations || []).map((o) => el('article', { class: 'ob' },
+      el('p', { text: cleanText(o.summary) || 'No summary given.' }),
+      o.sufficiency ? el('div', { class: 'meta', text: `Sufficiency: ${cleanText(o.sufficiency)}` }) : null,
+      (o.evidence_ids || []).length ? chips(o.evidence_ids) : el('div', { class: 'meta', text: 'No records cited.' }),
+      (o.missing_information || []).length ? el('div', { class: 'meta' }, el('b', { text: 'Missing: ' }), o.missing_information.map(cleanText).join('; ')) : null)),
+    (L.observations || []).length ? null : el('p', { class: 'meta', text: 'No observations returned.' }),
+    total > (L.observations || []).length ? el('p', { class: 'meta', text: `Showing ${(L.observations || []).length} of ${total}.` }) : null);
+  const right = el('div', { class: 'legal-col' }, el('h3', { text: 'Magistrate’s objections' }),
+    ...(L.critic_issues || []).map((i) => el('article', { class: 'ob' },
+      el('b', { class: 'ob-title', text: issuePlain(i.code) }), el('p', { text: cleanText(i.message) }), chips(i.evidence_ids))),
+    (L.critic_issues || []).length ? null : el('p', { class: 'meta', text: 'No objections recorded.' }),
+    (L.follow_ups || []).length ? el('div', { class: 'asked' }, el('b', { text: 'Asked for:' }), el('ul', null, L.follow_ups.map((x) => el('li', { text: cleanText(x) })))) : null);
+  return el('section', { class: 'card legal' }, el('h2', { text: 'What the AI reviewers did' }), el('p', { class: 'sub', text: summary }),
+    el('div', { class: 'legal-cols' }, left, right),
+    published ? null : el('p', { class: 'legal-foot', text: !outcome ? 'The verdict above comes from fixed rules. The Magistrate returned no outcome, so none are shown as findings.'
+      : outcome === 'PASS' ? 'The verdict above comes from fixed rules. None of these observations are shown as findings.'
+      : 'The verdict above comes from fixed rules. The Magistrate would not sign off on these observations, so none are shown as findings.' }));
 }
 
 // Agency text arrives as "novdescription: ALL CAPS SENTENCE; job_type: A2; work_type: Plumbing". Drop the field labels and the

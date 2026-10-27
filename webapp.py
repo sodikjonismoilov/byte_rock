@@ -12,6 +12,7 @@ One investigation runs at a time (Zetaris temporary databases, one Nightshift).
 import argparse
 import json
 import os
+import re
 import sys
 import threading
 import time
@@ -128,6 +129,52 @@ FINDING_FIELDS = (
 COVERAGE_FIELDS = ("source", "title", "publisher", "status", "records_returned", "reason", "source_url")
 
 
+LEGAL_TEXT_CAP = 400
+_CONTROL = re.compile(r"[\x00-\x1f\x7f-\x9f]+")
+
+
+def _legal_text(value) -> str:
+    """Model-written text is untrusted: flatten control characters and cap the length. The page renders it as plain text."""
+    return _CONTROL.sub(" ", str(value if value is not None else "")).strip()[:LEGAL_TEXT_CAP]
+
+
+def _legal_list(values, limit) -> list:
+    return [_legal_text(v) for v in (values if isinstance(values, list) else [])[:limit]]
+
+
+def _legal_details(report: dict):
+    """What the AI reviewers produced, or None when the run has no legal_assessment or only the scripted deterministic one.
+    Only the fields below are passed on: never registration or contact records, never raw model output."""
+    legal = report.get("legal_assessment")
+    if not isinstance(legal, dict):
+        return None
+    if "deterministic" in str(legal.get("reasoning_mode") or ""):
+        return None  # the scripted demo reviewers also write a legal_assessment, but no AI model ran, so there is nothing to show
+    dicts = lambda values: [v for v in (values if isinstance(values, list) else []) if isinstance(v, dict)]  # noqa: E731
+    reviews = dicts(legal.get("review_history"))
+    last = reviews[-1] if reviews else {}
+    board = report.get("board_update") if isinstance(report.get("board_update"), dict) else {}
+    findings = dicts(legal.get("findings"))
+    return {
+        "status": _legal_text(legal.get("status")),
+        "critic_outcome": _legal_text(legal.get("critic_outcome")),
+        "reviews": len(reviews),
+        "published": len(board.get("legal_findings") or []) if isinstance(board.get("legal_findings"), list) else 0,
+        "planner_questions": sum(len(p.get("questions") or []) for p in dicts(legal.get("plans")) if isinstance(p.get("questions") or [], list)),
+        "observation_total": len(findings),
+        "observations_cited": sum(1 for f in findings if f.get("evidence_ids")),
+        "observations": [{
+            "finding_id": _legal_text(f.get("finding_id")), "summary": _legal_text(f.get("summary")),
+            "evidence_ids": _legal_list(f.get("evidence_ids"), 12), "sufficiency": _legal_text(f.get("sufficiency")),
+            "missing_information": _legal_list(f.get("missing_information"), 6),
+        } for f in findings[:6]],
+        "critic_issues": [{
+            "code": _legal_text(i.get("code")), "message": _legal_text(i.get("message")), "evidence_ids": _legal_list(i.get("evidence_ids"), 12),
+        } for i in dicts(last.get("issues"))[:6]],
+        "follow_ups": _legal_list(last.get("revision_instructions"), 4),
+    }
+
+
 def _result_details(directory: Path) -> dict:
     """What the page needs to draw the result, taken from the run's own report file."""
     try:
@@ -144,6 +191,7 @@ def _result_details(directory: Path) -> dict:
         "findings": [{k: f.get(k) for k in FINDING_FIELDS} for f in report.get("factual_findings", [])],
         "coverage": [{k: c.get(k) for k in COVERAGE_FIELDS} for c in report.get("coverage", [])],
         "limitations": report.get("limitations", [])[:12],
+        "legal": _legal_details(report),
     }
 
 

@@ -230,6 +230,22 @@ li.accepted i { color: var(--ok); } li.rejected i { color: var(--red); } li.held
 .find.quiet p { color: var(--ink2); }
 .chip.quiet { background: transparent; box-shadow: inset 0 0 0 1px rgba(0,0,0,.28); color: var(--ink2); font-weight: 600; }
 .find .meta { margin: -4px 0 8px; font-size: 12.5px; color: var(--ink2); overflow-wrap: anywhere; }
+.find.ping { outline: 3px solid var(--brass); outline-offset: 3px; }
+/* What the AI reviewers did: dark, dashed cards so model-written text never looks like a verified agency record */
+.legal-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.legal-col h3 { margin: 0 0 4px; font-family: var(--mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.quiet-tag { font-size: 11px; letter-spacing: .02em; text-transform: none; font-weight: 400; color: var(--muted); border: 1px solid var(--line2); border-radius: 4px; padding: 1px 7px; }
+.ob { margin-top: 8px; padding: 10px 12px; background: var(--panel2); border: 1px dashed var(--line2); border-radius: var(--r); }
+.ob p { margin: 0 0 6px; font-size: 14px; overflow-wrap: anywhere; }
+.ob-title { display: block; margin-bottom: 2px; font-family: var(--serif); font-size: 15px; }
+.ob .meta { margin: 6px 0 0; font-size: 12.5px; color: var(--muted); overflow-wrap: anywhere; }
+.idchips { display: flex; flex-wrap: wrap; gap: 4px 6px; margin-top: 6px; }
+.idchips .rid { max-width: 100%; padding: 1px 6px; border-radius: 3px; background: rgba(255,255,255,.08); color: var(--text); font-family: var(--mono); font-size: 12px; white-space: nowrap; }
+.idchips .rid.jump { cursor: pointer; box-shadow: inset 0 0 0 1px var(--brass-dim); }
+.idchips .rid.jump:hover { background: rgba(207,165,81,.2); }
+.asked { margin-top: 12px; font-size: 13.5px; }
+.asked ul { margin: 4px 0 0; padding-left: 18px; color: var(--muted); }
+.legal-foot { margin: 14px 0 0; padding-top: 10px; border-top: 1px dashed var(--line2); font-size: 13.5px; color: var(--muted); }
 .rid { display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; vertical-align: bottom; }
 .placard .try { margin: 0 6px 14px; font-size: 14.5px; }
 .group.permits { margin-top: 12px; }
@@ -270,6 +286,7 @@ details.under > summary span { font-family: var(--mono); font-size: 12px; font-w
 .rules li > div { display: flex; flex-wrap: wrap; align-items: center; gap: 3px 5px; margin-top: 4px; }
 
 @media (max-width: 1000px) {
+  .legal-cols { grid-template-columns: 1fr; }
   .how { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .vkey { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .trust { grid-template-columns: 1fr; gap: 12px; }
