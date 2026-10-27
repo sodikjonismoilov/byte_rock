@@ -228,7 +228,7 @@ def transport(body):
 workflow=LegalResearchWorkflow(model_adapter=JSONModelAdapter(ExecutionLimits(),transport))
 summary,directory=cli.run_investigation(arguments(folder,['--reasoning','nvidia']),provider_factory=factory,workflow=workflow,load_configuration=False)
 events,summary,report=verify(directory)
-assert roles==['planner','researcher']
+assert roles==['planner','researcher','researcher']  # One repair retry before the all-rejected stop.
 assert report['factual_findings'] and not report['board_update']['legal_findings']
 assert 'PARTIAL — FACTUAL-ONLY' in (directory/'renter_report.md').read_text()
 assert 'Fixture maintenance observation' in (directory/'renter_report.md').read_text()

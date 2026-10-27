@@ -54,7 +54,7 @@ def validate_observations(wire_schema,content,trace=None):
         if len(raw['findings'])>limit:raise error
         envelope=wire_schema.model_validate({**raw,'findings':[]})
         observation_type=wire_schema.model_fields['findings'].annotation.__args__[0]
-        valid=[];rejected=0
+        valid=[];rejected=0;failures=[]
         ids=[f.get('finding_id') for f in raw['findings'] if isinstance(f,dict) and isinstance(f.get('finding_id'),str)]
         if len(ids)!=len(set(ids)):
             raise ValueError('Ambiguous duplicate observation IDs')
@@ -63,7 +63,7 @@ def validate_observations(wire_schema,content,trace=None):
                 checked=observation_type.model_validate(observation)
                 valid.append(checked.model_dump(mode='json'))
             except ValidationError as issue:
-                rejected+=1
+                rejected+=1;failures+=[{'path':['findings',str(index),*[str(p) for p in e['loc']]],'type':e['type']} for e in issue.errors(include_input=False,include_url=False)]
                 identifier=observation.get('finding_id') if isinstance(observation,dict) else None
                 identifier=identifier if isinstance(identifier,str) and re.fullmatch(r'[A-Za-z][A-Za-z0-9_-]{0,63}',identifier) else None
                 emit('research.observation_rejected',index=index,finding_id=identifier,
@@ -74,10 +74,10 @@ def validate_observations(wire_schema,content,trace=None):
         if not valid:
             emit('legal.review_unavailable',reason='all_observations_rejected')
             if __package__ and __package__.startswith('agents.legal_agent'):
-                from .tools.execution import ExecutionStopped
+                from .tools.execution import RepairableOutput
             else:
-                from tools.execution import ExecutionStopped
-            raise ExecutionStopped('Legal review unavailable: all Researcher observations failed validation')
+                from tools.execution import RepairableOutput
+            raise RepairableOutput('Legal review unavailable: all Researcher observations failed validation',failures[:12])
         envelope.findings=[]
         repaired={**envelope.model_dump(mode='json'),'findings':valid}
         repaired['caveats'].append(f'{rejected} invalid Researcher observation(s) discarded in full; remaining observations require independent legal review.')

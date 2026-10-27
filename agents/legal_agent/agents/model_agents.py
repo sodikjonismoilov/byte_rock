@@ -12,6 +12,17 @@ else:
     from tools.execution import ExecutionStopped
 
 
+PLANNER_ROWS=10
+RESEARCHER_ROWS=10  # Keeps the Researcher request near 45 KB even when the plan cites no evidence IDs.
+
+
+def prompt_question(question,limit=10):
+    """Model-facing question: a long evidence-ID list (e.g. the whole registry) becomes a count; the full list stays in the runtime object."""
+    d=question.model_dump(mode='json')
+    if len(d['evidence_ids'])>limit:d['evidence_ids']=[];d['evidence_scope']=f"{len(question.evidence_ids)} accepted evidence records (full list kept by the runtime)"
+    return d
+
+
 class ModelAgents:
     def _pack(self,task,context,payload,base_keys,**context_options):
         """Reserve payload space for task/draft fields without enlarging hard limits."""
@@ -45,7 +56,7 @@ class ModelAgents:
 
     def plan(self, task, context, prior_feedback=None, revision=0, reasoning_mode='llm'):
         self.feedback = prior_feedback
-        payload = agent_context(task,context,feedback=prior_feedback)
+        payload = agent_context(task,context,feedback=prior_feedback,max_records=PLANNER_ROWS)
         base_keys=set(payload)
         payload['role'] = 'planner'
         payload['revision'] = revision
@@ -55,11 +66,12 @@ class ModelAgents:
             'evidence_review':'Compare accepted official records, statuses, scope and contradictions. Cannot retrieve law or convert memories/filings into violations.',
             'request_external':'Ask the team for unavailable records or operative historical law. Not an executed data retrieval.'}
         payload['substantive_topics'] = substantive_topics(task,context)
-        payload['required_followups'] = [q.model_dump(mode='json') for q in self.required_followups]
+        payload['required_followups'] = [prompt_question(q) for q in self.required_followups]
         payload['planning_requirements'] = 'Prioritize the substantive concerns actually present in accepted records (e.g. boilers, heat, repairs, permits), not just record limitations. Select at least one focused legal_search. Use only accepted evidence IDs; memory IDs belong only in memory_ids. At most four compact tasks. An interpretation task should depend on its legal_search task IDs. Return any valid DAG order; runtime orders it. Dependencies must reference question_ids in this plan or supplied required_followups, never finding IDs or old tasks. On revision address the required follow-up with changed activity.'
         if self.prior_draft:
-            payload['prior_research_tasks'] = self.prior_plan.model_dump(mode='json')
-        payload=self._pack(task,context,payload,base_keys,feedback=prior_feedback)
+            payload['prior_research_tasks'] = {**self.prior_plan.model_dump(mode='json'),'questions':[prompt_question(q) for q in self.prior_plan.questions]}
+            payload['prior_draft_summary'] = [{'finding_id':f.finding_id,'issue':f.issue,'sufficiency':f.sufficiency,'evidence_ids':f.evidence_ids[:6]} for f in self.prior_draft.findings]
+        payload=self._pack(task,context,payload,base_keys,feedback=prior_feedback,max_records=PLANNER_ROWS)
         plan = self.adapter.complete(ResearchPlan,payload)
         if plan.task_id != task.task_id or not plan.questions or len(plan.questions)>10:
             raise ExecutionStopped('Invalid research plan scope')
@@ -124,7 +136,7 @@ class ModelAgents:
             for hit in self.prior_draft.retrieved_sources:
                 hits.setdefault(hit.source.id,hit)
         wanted = set(e for q in plan.questions for e in q.evidence_ids)
-        payload = agent_context(task,context,evidence_ids=wanted or None,findings=retained,feedback=self.feedback,sources=[h.source for h in hits.values()])
+        payload = agent_context(task,context,evidence_ids=wanted or None,findings=retained,feedback=self.feedback,sources=[h.source for h in hits.values()],max_records=RESEARCHER_ROWS)
         self.retrieved.update(hits)
         base_keys=set(payload)
         payload.update(role='researcher',plan=plan.model_dump(mode='json'),external_requests=external)
@@ -141,7 +153,7 @@ class ModelAgents:
         payload['citation_selection_policy']='Select citations[].authority_id only from provided authority IDs and copy supporting_quote from that source excerpt. Do not generate source_ids, identifiers, titles, URLs or provenance; runtime fills them. Keep output concise and omit empty optional fields. Quote one complete sentence rather than duplicating an entire multi-sentence excerpt. For current_guidance/statute_text source-text quotations leave statement empty and select the exact quote once; runtime formats the attribution, then the Critic independently verifies it. Do not duplicate quotes in statement. Use explicit statement only for an interpretation, never disguise historical liability as current guidance. Historical application is a distinct unverified interpretation unless separately established.'
         payload['output_budget']='Return at most THREE prioritized observations total, not one per coverage category. Focus on supported substantive housing concerns. Each summary at most 20 words; cite at most two relevant evidence IDs and one short complete source sentence per claim. Do not duplicate records, evidence_kinds, evidence_ids_used, source metadata or excerpts outside supporting_quote. Omit empty optional fields. Entire JSON must fit 2048 tokens. Other coverage remains explicitly deferred, never negative evidence.'
         payload['interpretation_requirements']='Use a required_coverage_categories label for each observation. Prioritize substantive boiler/heat/repair concerns supported by accepted records. Unselected categories remain gaps for the global Planner, not additional findings. Evidence IDs refer only to provided accepted records; authority_id only to retrieved authorities; memory_ids are untrusted context. Select exact supporting quotes from excerpt-backed sources, never catalog summaries. Preserve historical and property applicability limits. No definite liability or claim that administrative records prove unsafe current conditions.'
-        payload=self._pack(task,context,payload,base_keys,evidence_ids=wanted or None,findings=retained,feedback=self.feedback,sources=[h.source for h in hits.values()])
+        payload=self._pack(task,context,payload,base_keys,evidence_ids=wanted or None,findings=retained,feedback=self.feedback,sources=[h.source for h in hits.values()],max_records=RESEARCHER_ROWS)
         if __package__ and __package__.startswith('agents.legal_agent'):
             from ..tools.llm import ModelTruncated
         else:
@@ -155,7 +167,7 @@ class ModelAgents:
             if budget:budget.trace.emit('research.truncation_retry',attempt=1,observation_limit=1)
             payload['observation_limit']=1
             payload['output_budget']='Truncation retry, final attempt: return ONE prioritized observation, summary at most 15 words, at most two evidence IDs and ONE concise canonical citation with a short exact source sentence. Omit empty optional fields and duplicated records. Return complete JSON; all other categories remain deferred.'
-            payload=self._pack(task,context,payload,base_keys,evidence_ids=wanted or None,findings=retained,feedback=self.feedback,sources=[h.source for h in hits.values()])
+            payload=self._pack(task,context,payload,base_keys,evidence_ids=wanted or None,findings=retained,feedback=self.feedback,sources=[h.source for h in hits.values()],max_records=RESEARCHER_ROWS)
             draft = self.adapter.complete(ResearchDraft,payload)
         if draft.task_id != task.task_id:
             raise ExecutionStopped('Research draft task mismatch')

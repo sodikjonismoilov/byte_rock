@@ -97,7 +97,15 @@ def record_totals(records):
         'by_status':count(lambda e:e.status or 'unknown',MAX_STATUS_BUCKETS)}
 
 
-def agent_context(task, context, *, evidence_ids=None, findings=(), feedback=None, sources=(), max_bytes=None):
+def authority_view(source):
+    """Exact excerpt, temporal limits and provenance stay; URL and topics are runtime-owned. Summary only when there is no excerpt."""
+    d=source.model_dump(mode='json',exclude={'url','topics','summary','effective_from','effective_to'})
+    d.update({k:v for k,v in source.model_dump(mode='json').items() if k in {'effective_from','effective_to'} and v})
+    if not source.excerpt:d['summary']=source.summary
+    return d
+
+
+def agent_context(task, context, *, evidence_ids=None, findings=(), feedback=None, sources=(), max_bytes=None, max_records=MAX_SHOWN_RECORDS):
     if __package__ and __package__.startswith('agents.legal_agent'):
         from .tools.execution import ExecutionStopped
     else:
@@ -154,10 +162,10 @@ def agent_context(task, context, *, evidence_ids=None, findings=(), feedback=Non
         if context_bytes(result)>limit:
             result[collection].pop();result['selection'][manifest].append(identifier)
     # Keep exact authoritative text, never manufacture compressed legal quotations.
-    for s in authorities:include('authorities',s.model_dump(mode='json'),'omitted_authority_ids',s.id)
+    for s in authorities:include('authorities',authority_view(s),'omitted_authority_ids',s.id)
     historical=set(context.reconciliation.historical_ids) if context.reconciliation else set()
     for e in evidence:
-        if len(result['evidence'])>=MAX_SHOWN_RECORDS:break
+        if len(result['evidence'])>=max_records:break
         row=e.model_dump(mode='json',exclude={'metadata'})
         row['metadata']={k:v for k,v in e.metadata.items() if k in {
             'source_url','record_id','original_record_id','dataset_id','retrieved_at','updated_at',

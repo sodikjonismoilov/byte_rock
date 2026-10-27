@@ -11,42 +11,80 @@
   <header class="top">
     <a class="brand" href="/"><span class="mark" aria-hidden="true"></span>SignSafe</a>
     <div class="top-right">
-      <span id="modePill" class="pill">starting…</span>
+      <span id="modePill" class="chip-status" tabindex="0" role="group"><i class="sdot amber" aria-hidden="true"></i><span class="txt">starting…</span></span>
       <button id="again" class="btn-ghost" type="button" hidden>New investigation</button>
     </div>
   </header>
 
   <main>
     <section id="home" class="home">
-     <div class="home-in">
-      <p class="eyebrow">NYC renter due diligence</p>
-      <h1>Is this building okay to rent?</h1>
-      <p class="lede">Seven specialists check the city’s own records, argue over which ones really belong to your building, and show every receipt.</p>
-
-      <form id="form" class="search" autocomplete="off">
-        <label class="field grow"><span>Street address</span>
-          <input id="address" required maxlength="200" placeholder="e.g. 840 Second Avenue" aria-describedby="formError"></label>
-        <label class="field"><span>Borough</span>
-          <select id="borough">
-            <option value="">Not sure</option><option>Manhattan</option><option>Brooklyn</option>
-            <option>Queens</option><option>Bronx</option><option>Staten Island</option>
-          </select></label>
-        <label class="field"><span>Unit <i>(optional)</i></span>
-          <input id="unit" maxlength="20" placeholder="4B"></label>
-        <button id="go" class="go" type="submit">Investigate</button>
-      </form>
-      <div class="modes" role="group" aria-label="Where the records come from">
-        <button type="button" class="seg" data-mode="sample" aria-pressed="false">Recorded demo</button>
-        <button type="button" class="seg" data-mode="live" aria-pressed="false">Live city data</button>
-        <span id="modeHint" class="hint"></span>
+      <div class="hero">
+        <p class="eyebrow">NYC renter due diligence</p>
+        <h1>Is this building okay to rent?</h1>
+        <p class="lede">Seven specialists check the city’s own records, argue over which ones really belong to your building, and show every receipt.</p>
       </div>
-      <p class="fineprint">Works best for apartment buildings. Offices, shops and many small buildings have little or no HPD data.</p>
-      <p id="formError" class="error" role="alert" hidden></p>
-      <div id="realCases" class="cases"></div>
-      <div id="cases" class="cases" hidden></div>
-     </div>
 
-      <ol id="crewIntro" class="crew-intro" aria-label="Meet the crew"></ol>
+      <form id="form" class="form-card" autocomplete="off">
+        <div class="form-top">
+          <div id="boroughSeg" class="seg-group bseg-group" role="group" aria-label="Borough">
+            <button type="button" class="bseg" data-borough="" aria-pressed="true">Not sure</button>
+            <button type="button" class="bseg" data-borough="Manhattan" aria-pressed="false">Manhattan</button>
+            <button type="button" class="bseg" data-borough="Brooklyn" aria-pressed="false">Brooklyn</button>
+            <button type="button" class="bseg" data-borough="Queens" aria-pressed="false">Queens</button>
+            <button type="button" class="bseg" data-borough="Bronx" aria-pressed="false">Bronx</button>
+            <button type="button" class="bseg" data-borough="Staten Island" aria-pressed="false">Staten Island</button>
+          </div>
+          <div class="seg-group modes" role="group" aria-label="Where the records come from">
+            <button type="button" class="seg" data-mode="live" aria-pressed="false">Live city data · 1-3 min</button>
+            <button type="button" class="seg" data-mode="sample" aria-pressed="false">Offline replay · sample only</button>
+          </div>
+        </div>
+        <!-- single source of truth for the borough; the segmented control above drives it -->
+        <select id="borough" class="vh" tabindex="-1" aria-hidden="true">
+          <option value="">Not sure</option><option>Manhattan</option><option>Brooklyn</option>
+          <option>Queens</option><option>Bronx</option><option>Staten Island</option>
+        </select>
+        <div class="form-main">
+          <label class="field grow"><span>Street address</span>
+            <span class="inputwrap">
+              <svg class="pin" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.800 12 21 12 21z"/><circle cx="12" cy="9.500" r="2.500"/></svg>
+              <input id="address" required maxlength="200" autofocus placeholder="e.g. 840 Second Avenue" aria-describedby="formError">
+            </span></label>
+          <label class="field unit"><span>Unit <i>(optional)</i></span>
+            <input id="unit" maxlength="20" placeholder="e.g. 4B"></label>
+          <button id="go" class="go" type="submit">Investigate</button>
+        </div>
+      </form>
+      <p id="formError" class="error" role="alert" hidden></p>
+      <div class="notes">
+        <p id="modeHint" class="note"></p>
+        <p class="note">Works best for apartment buildings. Offices, shops and many small buildings have little or no HPD data.</p>
+      </div>
+
+      <div class="tryrow">
+        <span class="try-label">Try a real building:</span>
+        <div id="realCases" class="chips"></div>
+        <div id="cases" class="chips" hidden></div>
+      </div>
+
+      <ul class="trust" aria-label="What to expect">
+        <li><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.700 3.600 3 8 3s8-1.300 8-3V6M4 12v6c0 1.700 3.600 3 8 3s8-1.300 8-3v-6"/></svg>
+          <span>20 public NYC data sources, 17 checked automatically, 3 marked “check manually”</span></li>
+        <li><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4.500 4.500 0 0 0 6.400 0l3-3a4.500 4.500 0 0 0-6.400-6.400l-1 1"/><path d="M14 10a4.500 4.500 0 0 0-6.400 0l-3 3a4.500 4.500 0 0 0 6.400 6.400l1-1"/></svg>
+          <span>Every finding links to its city record</span></li>
+        <li><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.500v.01"/></svg>
+          <span>Never says “safe”: missing data is never good news</span></li>
+      </ul>
+
+      <section class="block" aria-labelledby="howH">
+        <h2 id="howH" class="block-h">How it works</h2>
+        <ol id="crewIntro" class="how" aria-label="The crew, in four stages"></ol>
+      </section>
+
+      <section class="block" aria-labelledby="vkH">
+        <h2 id="vkH" class="block-h">What the verdict can say</h2>
+        <ul id="verdictKey" class="vkey"></ul>
+      </section>
     </section>
 
     <section id="case" class="case" hidden>

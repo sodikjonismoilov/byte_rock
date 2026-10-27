@@ -33,13 +33,13 @@ const statusKind = (status) => (CLOSED_RE.test(status || '') ? 'closed' : OPEN_R
 const PERMIT_DATASETS = new Set(['ipu4-2q9a', 'ic3t-wcy2', 'rbx6-tga4', 'w9ak-ipjd']);  // DOB permits and job filings (routine paperwork)
 
 const CREW = [
-  { id: 'surveyor', name: 'Surveyor', role: 'Identity resolution', engine: 'rules', hue: 210, blurb: 'Works out exactly which building you mean (BBL, BIN, HPD id).' },
-  { id: 'archivist', name: 'Archivist', role: 'Records via Zetaris', engine: 'zetaris', hue: 188, blurb: 'Pulls the city’s records through the Zetaris data layer.' },
-  { id: 'warden', name: 'Warden', role: 'Critic · rules R1–R10', engine: 'rules', hue: 6, blurb: 'Throws out any record that does not belong to this building.' },
-  { id: 'pathfinder', name: 'Pathfinder', role: 'Planner', engine: 'model', hue: 265, blurb: 'Plans which legal and safety questions are worth asking.' },
-  { id: 'bloodhound', name: 'Bloodhound', role: 'Researcher', engine: 'model', hue: 32, blurb: 'Chases the evidence behind each question, with citations.' },
-  { id: 'magistrate', name: 'Magistrate', role: 'Legal Critic', engine: 'model', hue: 300, blurb: 'Sends weak drafts back, or refuses to conclude without proof.' },
-  { id: 'assessor', name: 'Assessor', role: 'Verdict rules', engine: 'rules', hue: 145, blurb: 'Stamps the placard from fixed, checkable rules. Never says “safe”.' },
+  { id: 'surveyor', stage: 1, name: 'Surveyor', role: 'Identity resolution', engine: 'rules', hue: 210, blurb: 'Works out exactly which building you mean (BBL, BIN, HPD id).' },
+  { id: 'archivist', stage: 1, name: 'Archivist', role: 'Records via Zetaris', engine: 'zetaris', hue: 188, blurb: 'Pulls the city’s records through the Zetaris data layer.' },
+  { id: 'warden', stage: 2, name: 'Warden', role: 'Critic · rules R1–R10', engine: 'rules', hue: 6, blurb: 'Throws out any record that does not belong to this building.' },
+  { id: 'pathfinder', stage: 3, name: 'Pathfinder', role: 'Planner', engine: 'model', hue: 265, blurb: 'Plans which legal and safety questions are worth asking.' },
+  { id: 'bloodhound', stage: 3, name: 'Bloodhound', role: 'Researcher', engine: 'model', hue: 32, blurb: 'Chases the evidence behind each question, with citations.' },
+  { id: 'magistrate', stage: 3, name: 'Magistrate', role: 'Legal Critic', engine: 'model', hue: 300, blurb: 'Sends weak drafts back, or refuses to conclude without proof.' },
+  { id: 'assessor', stage: 4, name: 'Assessor', role: 'Verdict rules', engine: 'rules', hue: 145, blurb: 'Stamps the placard from fixed, checkable rules. Never says “safe”.' },
 ];
 const CREW_BY_ID = Object.fromEntries(CREW.map((c) => [c.id, c]));
 
@@ -81,9 +81,27 @@ const shortModel = (m) => String(m).replace(/^nvidia\//, '');
 
 function avatar(c) { return el('div', { class: 'avatar', style: `--h:${c.hue}`, 'aria-hidden': 'true', text: c.name[0] }); }
 
+// Home page "how it works": generated from CREW so names, roles and engines live in one place.
+const STAGES = ['Find the building', 'Throw out wrong records', 'Investigate', 'Stamp the verdict'];
+function arrowIcon() {
+  const ns = 'http://www.w3.org/2000/svg', svg = document.createElementNS(ns, 'svg'), path = document.createElementNS(ns, 'path');
+  for (const [k, v] of Object.entries({ viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true', class: 'arrow' })) svg.setAttribute(k, v);
+  path.setAttribute('d', 'M5 12h14M13 6l6 6-6 6');
+  svg.append(path);
+  return svg;
+}
 function renderCrewIntro() {
-  $('#crewIntro').replaceChildren(...CREW.map((c) => el('li', null, avatar(c),
-    el('div', null, el('h3', { text: c.name }), el('div', { class: 'role', text: c.role }), el('p', { text: c.blurb })))));
+  $('#crewIntro').replaceChildren(...STAGES.map((title, i) => el('li', { class: 'stage-card' },
+    el('h3', null, el('span', { class: 'sn', 'aria-hidden': 'true', text: String(i + 1) }), title),
+    el('ul', { class: 'agents' }, CREW.filter((c) => c.stage === i + 1).map((c) => el('li', { title: c.blurb },
+      el('div', { class: 'emblem', 'data-agent': c.id }, avatar(c)),
+      el('div', { class: 'ident' }, el('div', { class: 'name', text: c.name }), el('div', { class: 'role', text: c.role }), engineTag(c))))),
+    i < STAGES.length - 1 ? arrowIcon() : null)));
+}
+// "What the verdict can say": the copy comes straight from VERDICTS, so it cannot drift from the real placard.
+function renderVerdictKey() {
+  $('#verdictKey').replaceChildren(...Object.entries(VERDICTS).map(([name, v]) => el('li', { class: 'vk', 'data-level': v.level },
+    el('div', { class: 'vk-stamp', text: name }), el('p', { text: v.line }))));
 }
 
 function renderStation(id) {
@@ -265,6 +283,7 @@ function renderCounters() {
     pill('held for review', String(S.warden.held)),
     pill('model calls', String(S.modelCalls)),
     pill('elapsed', mmss(S.running ? (Date.now() - S.startedAt) / 1000 : S.elapsed || 0)));
+  setPill();  // renderCounters already runs on model events and the 1 s tick, so the header chip stays live
 }
 let ledgerTimer = 0;
 // Socrata dataset ids (VERIFIED_SOURCE_INVENTORY.md) -> what a renter would call the record. Unknown ids show as-is.
@@ -389,7 +408,7 @@ async function startRun(payload) {
   $('#home').hidden = true; $('#case').hidden = false; $('#again').hidden = true;
   resetRun();
   $('#hudAddr').textContent = payload.address;
-  $('#hudSub').textContent = `${payload.borough || 'Borough not given'}${payload.unit ? ` · unit ${payload.unit}` : ''} · ${payload.mode === 'sample' ? 'recorded demo' : 'live city data'}`;
+  $('#hudSub').textContent = `${payload.borough || 'Borough not given'}${payload.unit ? ` · unit ${payload.unit}` : ''} · ${payload.mode === 'sample' ? 'offline replay' : 'live city data'}`;
   setPill(payload.mode === 'sample' ? 'sample' : 'live');
   S.running = true; S.startedAt = Date.now();
   await ensureBoard();
@@ -642,14 +661,68 @@ function renderDownloads(body) {
 }
 
 /* ---------- home ---------- */
-const REAL_BUILDINGS = ['686 3 AVENUE', '840 2 AVENUE', '150 EAST 44 STREET', '337 EAST 49 STREET'];  // all Manhattan; known to have HPD records
-function setPill(kind, r) {
-  const pill = $('#modePill');
-  pill.className = `pill ${kind}`;
-  const models = r ? (r.models_used || []) : [...S.models];  // finished: what the run reports; running: model events seen so far
-  pill.textContent = kind === 'sample' ? 'Recorded replay · not live data'
-    : models.length ? `Live · Zetaris + ${shortModel(models[0])}`
-    : r ? 'Live · Zetaris · rules only, no AI model' : 'Live · Zetaris';
+// The hidden <select id="borough"> is the single source of truth; the segmented control reads and writes it.
+function syncBorough() {
+  const value = $('#borough').value;
+  document.querySelectorAll('.bseg').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.borough === value)));
+}
+function setBorough(value) {
+  $('#borough').value = value;
+  $('#borough').dispatchEvent(new Event('change', { bubbles: true }));
+}
+// Tags come from our own test runs, not live data, and can go stale. Keep them short and factual.
+const REAL_BUILDINGS = [
+  { address: '686 3 AVENUE', tag: 'open Class C, older records' },
+  { address: '840 2 AVENUE', tag: 'open Class C, recent' },
+  { address: '150 EAST 44 STREET', tag: 'no flags in testing' },
+  { address: '337 EAST 49 STREET', tag: 'open Class C, recent' },
+];  // all Manhattan
+// ---- header status chip: says what actually ran. Computed only from the finished result and the counters/trace the page already keeps. ----
+// Has a model.failed row reached the trace? Scanned incrementally, so the 1 s tick and per-event redraws stay cheap.
+const pillScan = { n: 0, first: null, failed: false };
+function modelFailedSeen() {
+  const box = $('#trace'), rows = box.children;
+  if (pillScan.first !== box.firstElementChild || rows.length < pillScan.n) Object.assign(pillScan, { n: 0, first: box.firstElementChild, failed: false });
+  for (; pillScan.n < rows.length; pillScan.n++) {
+    const row = rows[pillScan.n];
+    if (!pillScan.failed && row.classList.contains('bad') && row.querySelector('.ty')?.textContent === 'model.failed') pillScan.failed = true;
+  }
+  return pillScan.failed;
+}
+function pillState() {
+  const r = S.job && !S.running ? S.final : null;  // the finished run's result, never a previous run's
+  if (r ? r.data_mode === 'recorded_replay' : S.mode === 'sample') {
+    return { kind: 'sample', text: 'Offline replay · recorded data', dot: 'amber', title: 'Replays a saved capture. Not live city data and no model call.' };
+  }
+  if (!S.job) return { kind: 'live', text: 'Live · Zetaris', dot: 'green', title: 'City records come through Zetaris. Whether an AI model is used is shown once a run starts.' };
+  const names = r?.models_used?.length ? r.models_used : [...S.models];
+  const calls = S.modelCalls, model = names.length ? shortModel(names[0]) : null;
+  if (!model && !calls) {
+    return { kind: 'rules', text: 'Live · Zetaris · fixed rules this run', dot: 'green', title: 'City records came through Zetaris. The verdict comes from fixed rules. No AI model was called in this run.' };
+  }
+  const label = model || 'AI model';
+  const ended = !S.running, errored = ended && (!S.final || /error|fail|budget|timeout|exceed/i.test(S.final.termination_reason || ''));
+  // The Critic's outcome (REVISE / BLOCKED / INCONCLUSIVE) means the review ran and answered, so it is never "unfinished".
+  // PASS is the normal completed review and keeps the plain "via Nightshift · N calls" chip.
+  const outcome = (S.crew.magistrate?.note || '').match(/^Outcome:\s*(\w+)/)?.[1]?.toUpperCase();
+  if (outcome && outcome !== 'PASS') {
+    return { kind: 'reviewer', text: `Live · Zetaris + ${label} · AI reviewer: ${outcome.toLowerCase()}`, dot: 'green',
+      title: 'The AI reviewer examined cited records and returned this outcome. The verdict still comes from fixed rules.' };
+  }
+  if (!outcome && (errored || modelFailedSeen())) {
+    return { kind: 'unfinished', text: `Live · Zetaris + ${label} · AI review unfinished`, dot: 'amber', title: 'A model was called but its legal review did not finish, so no AI findings are shown.' };
+  }
+  return { kind: 'model', text: `Live · Zetaris + ${label} via Nightshift${calls ? ` · ${plural(calls, 'call')}` : ''}`, dot: S.running ? 'green pulse' : 'green',
+    title: 'The model name is the one Nightshift reports for this run. The verdict still comes from fixed rules.' };
+}
+function setPill() {
+  const st = pillState(), pill = $('#modePill'), key = `${st.kind}|${st.text}|${st.dot}`;
+  if (pill.dataset.key === key) return;  // unchanged: leave the DOM (and the pulse animation) alone
+  pill.dataset.key = key; pill.dataset.kind = st.kind; pill.title = st.title; pill.setAttribute('aria-label', `${st.text}. ${st.title}`);
+  // On phones the part after " via " / " · N calls" is hidden; for the AI-review states the model name goes instead, so the warning stays visible.
+  const split = st.text.match(/^(.*?)( via .*| · \d+ calls?)$/), unfinished = /^(unfinished|reviewer)$/.test(st.kind) && st.text.match(/^(Live · Zetaris)( \+ .+?)( · AI review.*)$/);
+  const parts = unfinished ? [unfinished[1], el('span', { class: 'more', text: unfinished[2] }), unfinished[3]] : split ? [split[1], el('span', { class: 'more', text: split[2] })] : st.text;
+  pill.replaceChildren(el('i', { class: `sdot ${st.dot}`, 'aria-hidden': 'true' }), el('span', { class: 'txt' }, parts));
 }
 function setMode(mode) {
   S.mode = mode;
@@ -673,13 +746,17 @@ async function boot() {
   try { S.cfg = await (await fetch('/api/config')).json(); } catch (error) { S.cfg = { default_mode: 'sample', cases: [] }; }
   setMode(S.cfg.default_mode === 'live' ? 'live' : 'sample');
   const real = $('#realCases');
-  real.replaceChildren('Try a real building:', ...REAL_BUILDINGS.map((address) => el('button', { type: 'button', class: 'chip-btn', onclick: () => {
-    $('#address').value = address; $('#borough').value = 'Manhattan'; setMode('live');  // fills the form; the person still presses Investigate
-  } }, address)));
+  real.replaceChildren(...REAL_BUILDINGS.map(({ address, tag }) => el('button', { type: 'button', class: 'chip-btn', onclick: () => {
+    $('#address').value = address; setBorough('Manhattan'); setMode('live');  // fills the form; the person still presses Investigate
+  } }, address, el('small', { text: tag }))));
+  document.querySelectorAll('.bseg').forEach((b) => b.addEventListener('click', () => setBorough(b.dataset.borough)));
+  $('#borough').addEventListener('change', syncBorough);
+  syncBorough();
+  renderVerdictKey();
   if (S.cfg.cases?.length) {
     const box = $('#cases'); box.hidden = false;
-    box.replaceChildren('Or an offline sample:', ...S.cfg.cases.map((c) => el('button', { type: 'button', class: 'chip-btn', onclick: () => {
-      $('#address').value = c.address; $('#borough').value = c.borough || ''; $('#unit').value = c.unit || '';
+    box.replaceChildren(...S.cfg.cases.map((c) => el('button', { type: 'button', class: 'chip-btn sample', onclick: () => {
+      $('#address').value = c.address; setBorough(c.borough || ''); $('#unit').value = c.unit || '';
       setMode('sample'); startRun({ address: c.address, borough: c.borough || '', unit: c.unit || '', mode: 'sample' });
     } }, `Offline replay · ${c.label || c.address}`)));
   }

@@ -30,6 +30,12 @@ class ExecutionStopped(RuntimeError):
     pass
 
 
+class RepairableOutput(ExecutionStopped):
+    """Strict validation failed; details hold field paths and error types only, never response values."""
+    def __init__(self,message,details):
+        super().__init__(message);self.details=details
+
+
 class ExecutionBudget:
     """One investigation budget shared by data access and the legal workflow.
 

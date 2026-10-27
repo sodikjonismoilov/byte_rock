@@ -74,3 +74,72 @@ def test_truncation_and_transport_errors_are_not_repair_retried(adapter_for):
     with pytest.raises(ExecutionStopped, match='invalid structured output'):
         adapter.complete(CriticReport, PAYLOAD)
     assert len(calls) == 1
+
+
+# --- schema-derived example and required-field repair note ---
+from citations import selection_schema
+from models.schemas import ResearchDraft, ResearchPlan
+from tools.llm import model_request
+from tools.schema_hints import example_object, required_fields_note
+
+SENTINEL = 'SECRET-SENTINEL-VALUE-123'
+
+
+def wire_for(schema):
+    if schema is ResearchDraft:
+        return selection_schema([{'id': 'hpd-heat-hot-water'}], ['EV-HEAT-HPD-002']).model_json_schema(), selection_schema([{'id': 'hpd-heat-hot-water'}], ['EV-HEAT-HPD-002'])
+    return schema.model_json_schema(), schema
+
+
+@pytest.mark.parametrize('schema', [ResearchPlan, ResearchDraft, CriticReport])
+def test_example_object_is_schema_valid_for_every_structured_call(schema):
+    schema_json, model = wire_for(schema)
+    example = example_object(schema_json, {'task_id': 't1'})
+    model.model_validate(example)  # Strict validation of the example itself.
+    assert example['task_id'] == 't1'
+    if schema is CriticReport:
+        assert set(example) == {'task_id', 'outcome'}
+    if schema is ResearchDraft:
+        citation = example['findings'][0]['legal_conclusions'][0]['citations'][0]
+        assert citation['authority_id'] == 'hpd-heat-hot-water' and 'supporting_quote' in citation
+        assert example['findings'][0]['evidence_ids'] == ['EV-HEAT-HPD-002']
+    if schema is ResearchPlan:
+        assert {'question_id', 'prompt'} <= set(example['questions'][0])
+
+
+def test_every_request_carries_the_example_in_the_system_message():
+    _, body = model_request(CriticReport, dict(PAYLOAD))
+    system = body['messages'][0]['content']
+    assert 'Return exactly one JSON object shaped like this example' in system
+    assert '"task_id":"t1"' in system and '"outcome"' in system
+    assert json.loads(body['messages'][-1]['content']) == PAYLOAD
+
+
+def test_repair_note_lists_required_fields_and_types_but_never_response_values(adapter_for):
+    adapter, calls, _ = adapter_for(json.dumps({'issues': [{'code': SENTINEL}], 'note': SENTINEL}), VALID)
+    adapter.complete(CriticReport, PAYLOAD)
+    system = calls[1]['messages'][0]['content']
+    note = system.split('rejected by schema validation')[1]
+    assert 'top-level object requires: task_id (string), outcome (string)' in note
+    assert SENTINEL not in system and SENTINEL not in json.dumps(calls[1]['messages'][-1])
+
+
+def test_observation_level_failure_gets_one_repair_with_nested_required_fields(adapter_for):
+    payload = {'role': 'researcher', 'task_id': 't1', 'authorities': [{'id': 'hpd-heat-hot-water'}], 'reference_domains': {'evidence_ids': ['EV-HEAT-HPD-002']}}
+    bad = json.dumps({'task_id': 't1', 'findings': [{'finding_id': 'f1', 'issue': 'heat', 'summary': 's', 'evidence_ids': ['EV-HEAT-HPD-002'],
+        'legal_conclusions': [{'claim_scope': 'current_guidance', 'citations': [{'supporting_quote': SENTINEL}]}]}]})
+    adapter, calls, sink = adapter_for(bad, bad)
+    with pytest.raises(ExecutionStopped, match='Legal review unavailable: all Researcher observations failed validation'):
+        adapter.complete(ResearchDraft, payload)
+    assert len(calls) == 2  # One repair retry, no more.
+    system = calls[1]['messages'][0]['content']
+    assert 'citations requires: authority_id (string), supporting_quote (string)' in system and SENTINEL not in system
+    retry = [e for e in sink.events if e['type'] == 'model.repair_retry']
+    assert len(retry) == 1 and retry[0]['data']['role'] == 'researcher'
+
+
+def test_required_fields_note_follows_nested_paths():
+    schema_json, _ = wire_for(ResearchDraft)
+    note = required_fields_note(schema_json, [{'path': ['findings', '0', 'legal_conclusions', '0', 'citations', '0', 'authority_id'], 'type': 'missing'}])
+    assert note == 'findings.legal_conclusions.citations requires: authority_id (string), supporting_quote (string)'
+    assert required_fields_note(schema_json, [{'path': ['findings'], 'type': 'missing'}]).startswith('top-level object requires: task_id (string), findings (array)')

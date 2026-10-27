@@ -73,7 +73,7 @@ def test_critic_receives_only_valid_observations_or_is_unavailable(monkeypatch,h
     result=LegalResearchWorkflow(model_adapter=JSONModelAdapter(ExecutionLimits(),transport),max_revision_cycles=0).run(heat_task,heat_context)
     assert any(e['type']=='research.observation_rejected' for e in result.activity_events)
     if all_invalid:
-        assert roles==['planner','researcher'] and not reviewed and not result.findings
+        assert roles==['planner','researcher','researcher'] and not reviewed and not result.findings  # One repair retry first.
         assert result.status.value=='inconclusive' and not result.review_history
         assert 'Legal review unavailable' in result.errors[0].message
     else:

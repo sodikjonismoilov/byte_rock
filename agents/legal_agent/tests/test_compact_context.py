@@ -182,3 +182,95 @@ def test_mandatory_budget_guard_still_stops_instead_of_truncating():
     ctx.unresolved_questions = ['unknown ' * 9000]
     with pytest.raises(ExecutionStopped, match='Mandatory'):
         agent_context(task, ctx)
+
+
+# --- Researcher request size (target ~45 KB) ---
+def researcher_request_size(task, ctx):
+    from tools.legal_search import LegalSearchTool
+    from models.schemas import ResearchPlan
+    from tools.llm import request_size
+    from models.schemas import ResearchDraft
+    seen = {}
+    adapter = Mock()
+    adapter.complete.side_effect = lambda schema, payload: seen.setdefault('p', payload) and (_ for _ in ()).throw(ExecutionStopped('captured'))
+    plan = ResearchPlan(task_id=task.task_id, objective='o', questions=[{'question_id': 'q1', 'prompt': 'NYC housing heat boiler violations duties', 'recommended_tool': 'legal_search'}])
+    with pytest.raises(ExecutionStopped, match='captured'):
+        ModelAgents(adapter).research(task, ctx, plan, LegalSearchTool())
+    return request_size(ResearchDraft, seen['p']), seen['p']
+
+
+@pytest.mark.parametrize('name', FIXTURES)
+def test_researcher_request_under_45kb_for_saved_runs_even_when_plan_cites_no_ids(name):
+    task, ctx = fixture_building(name)
+    size, payload = researcher_request_size(task, ctx)
+    assert size < 45000 and len(payload['evidence']) <= 10 and payload['authorities']
+    assert all('excerpt_provenance' in a for a in payload['authorities'] if a.get('excerpt'))  # Provenance kept.
+    assert all(a['temporal_limitations'] for a in payload['authorities'])
+
+
+def test_researcher_request_under_45kb_for_double_synthetic_building():
+    task, ctx, _ = synthetic_building(2)
+    size, payload = researcher_request_size(task, ctx)
+    assert size < 45000 and payload['selection']['records_not_shown'] > 0
+
+
+# --- second (revision) Planner pass ---
+def second_planner_payload(task, ctx, followups=2, adapter_answer=None):
+    from models.schemas import CriticReport, Finding, ResearchDraft, ResearchQuestion
+    seen = {}
+    adapter = Mock()
+    def complete(schema, payload):
+        seen.setdefault('p', payload)
+        if adapter_answer:return adapter_answer
+        raise ExecutionStopped('captured')
+    adapter.complete.side_effect = complete
+    agents = ModelAgents(adapter)
+    ids = [e.evidence_id for e in ctx.evidence]
+    agents.prior_plan = ResearchPlan(task_id=task.task_id, objective='o', questions=[{'question_id': 'runtime-authority-lookup', 'prompt': 'NYC housing duties', 'recommended_tool': 'legal_search', 'evidence_ids': ids}])
+    agents.prior_draft = ResearchDraft(task_id=task.task_id, plan_revision=0, findings=[Finding(finding_id='f1', issue='heat', summary='s', evidence_ids=ids[:2])])
+    agents.required_followups = [ResearchQuestion(question_id=f'critic-follow-up-1-{i}', prompt='Verify exact legal authority identifiers', recommended_tool='legal_search', evidence_ids=ids) for i in range(followups)]
+    feedback = CriticReport(task_id=task.task_id, outcome='REVISE', issues=[{'code': 'unsupported_legal_conclusion', 'message': 'm' * 300, 'follow_up_query': 'q' * 600}])
+    return agents, feedback, seen
+
+
+@pytest.mark.parametrize('name', FIXTURES)
+def test_second_planner_pass_under_45kb_for_saved_runs(name):
+    from models.schemas import ResearchPlan
+    task, ctx = fixture_building(name)
+    agents, feedback, seen = second_planner_payload(task, ctx)
+    with pytest.raises(ExecutionStopped, match='captured'):
+        agents.plan(task, ctx, prior_feedback=feedback, revision=1)
+    payload = seen['p']
+    assert request_size(ResearchPlan, payload) < 45000 and len(payload['evidence']) <= 10
+    assert payload['critic_feedback']['outcome'] == 'REVISE' and payload['prior_draft_summary'][0]['finding_id'] == 'f1'
+    assert all(not q['evidence_ids'] and 'evidence_scope' in q for q in payload['required_followups'])
+    assert payload['prior_research_tasks']['questions'][0]['evidence_scope']
+
+
+def test_second_planner_pass_under_45kb_for_double_synthetic_building():
+    task, ctx, _ = synthetic_building(2)
+    agents, feedback, seen = second_planner_payload(task, ctx)
+    with pytest.raises(ExecutionStopped, match='captured'):
+        agents.plan(task, ctx, prior_feedback=feedback, revision=1)
+    assert request_size(ResearchPlan, seen['p']) < 45000
+
+
+def test_second_planner_plan_check_still_uses_full_registry():
+    task, ctx, _ = synthetic_building()
+    ids = [e.evidence_id for e in ctx.evidence]
+    unseen_but_real = ids[-1]  # Not among the shown rows, but in the registry: accepted by the server-side check.
+    good = ResearchPlan(task_id=task.task_id, objective='o', questions=[{'question_id': 'q', 'prompt': 'p', 'recommended_tool': 'legal_search', 'evidence_ids': [unseen_but_real]}])
+    agents, feedback, _ = second_planner_payload(task, ctx, adapter_answer=good)
+    assert agents.plan(task, ctx, prior_feedback=feedback, revision=1).questions
+    bad = good.model_copy(update={'questions': [good.questions[0].model_copy(update={'evidence_ids': ['wvxf-dwi5:999999999']})]})
+    agents, feedback, _ = second_planner_payload(task, ctx, adapter_answer=bad)
+    with pytest.raises(ExecutionStopped, match='outside their evidence or memory registry'):
+        agents.plan(task, ctx, prior_feedback=feedback, revision=1)
+
+
+def test_budget_guard_still_raises_for_oversize_mandatory_context_in_revision_pass():
+    task, ctx, _ = synthetic_building()
+    ctx.unresolved_questions = ['unknown ' * 9000]
+    agents, feedback, _ = second_planner_payload(task, ctx)
+    with pytest.raises(ExecutionStopped, match='Mandatory'):
+        agents.plan(task, ctx, prior_feedback=feedback, revision=1)
