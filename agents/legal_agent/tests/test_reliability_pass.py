@@ -65,10 +65,10 @@ def test_repeated_truncation_stops_after_single_retry(monkeypatch,heat_task,heat
     assert result.execution['model_calls']==3
 
 
-def test_invalid_nontruncated_json_is_not_retried_or_repaired(monkeypatch,heat_task,heat_context):
+def test_invalid_nontruncated_json_gets_one_repair_retry_then_stops(monkeypatch,heat_task,heat_context):
     configured(monkeypatch);transport,calls=model_transport(heat_task,invalid=True)
     result=LegalResearchWorkflow(model_adapter=JSONModelAdapter(ExecutionLimits(),transport)).run(heat_task,heat_context)
-    assert len(calls)==2 and not result.findings
+    assert [p['role'] for _,p in calls]==['planner','researcher','researcher'] and not result.findings
     assert 'invalid structured' in result.errors[0].message
 
 

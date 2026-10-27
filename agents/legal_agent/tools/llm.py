@@ -31,6 +31,12 @@ class ModelTruncated(ExecutionStopped):
     """A response marked length is unusable, including syntactically valid JSON."""
 
 
+class InvalidStructuredOutput(ExecutionStopped):
+    """Strict schema validation failed; carries only field paths and error types, never response values."""
+    def __init__(self,message,details):
+        super().__init__(message);self.details=details
+
+
 def request_budget():
     return min(int(os.getenv('LEGAL_CONTEXT_MAX_BYTES','40000')),
         int(os.getenv('LEGAL_MODEL_PAYLOAD_MAX_BYTES','64000')),
@@ -151,6 +157,13 @@ class JSONModelAdapter:
             return json.loads(raw)
 
     def complete(self, schema, payload):
+        """One repair retry per failed call: same request plus a note naming the invalid fields, validated by the same strict schema."""
+        try:return self._complete(schema,payload)
+        except InvalidStructuredOutput as first:
+            if self.budget:self.budget.trace.emit('model.repair_retry',role=payload.get('role'),schema=schema.__name__,reason='invalid_structured_output',validation=first.details)
+            return self._complete(schema,payload,repair=first.details)
+
+    def _complete(self, schema, payload, repair=None):
         if __package__ and __package__.startswith('agents.legal_agent'):
             from ..models.schemas import ResearchDraft
             from ..citations import selected_draft,validate_observations
@@ -159,6 +172,10 @@ class JSONModelAdapter:
             from citations import selected_draft,validate_observations
         wire_schema,body=model_request(schema,payload,self.model)
         size=request_size(schema,payload,self.model)
+        if repair:
+            fields=', '.join('.'.join(d['path'])+' ('+d['type']+')' for d in repair)
+            note=f'Your previous answer was rejected by schema validation. Invalid or missing fields: {fields}. Return the complete JSON object matching the schema, with every required top-level field.'
+            body['messages'][0]['content']+='\n'+note;size+=len(note.encode())+64  # Payload stays the final message.
         if size>request_budget():raise ExecutionStopped('Complete model request exceeds context budget')
         if self.budget:self.budget.trace.emit('context.request_built',role=payload.get('role'),request_bytes=size,
             request_budget=request_budget(),payload_bytes=len(json.dumps(payload,default=str).encode()),
@@ -193,9 +210,10 @@ class JSONModelAdapter:
                     raise ExecutionStopped('Model service unavailable after bounded retries') from None
             except (ValueError, KeyError, IndexError, TypeError) as error:
                 details=[{'path':[str(p) for p in item['loc']],'type':item['type']} for item in error.errors(include_input=False,include_url=False)] if hasattr(error,'errors') else []
-                if self.budget:self.budget.trace.emit('model.failed',provider=self.provider,model=self.model,attempt=attempt,
+                if self.budget:self.budget.trace.emit('model.failed',provider=self.provider,model=self.model,attempt=attempt,repair=bool(repair),
                     validation=details[:12],finish_reason=response.get('choices',[{}])[0].get('finish_reason') if isinstance(response,dict) and isinstance(response.get('choices'),list) and response['choices'] and isinstance(response['choices'][0],dict) else None,
                     duration_seconds=time.monotonic()-started)
+                if details and not repair:raise InvalidStructuredOutput('Model returned invalid structured output',details[:12]) from None
                 raise ExecutionStopped('Model returned invalid structured output') from None
 
 
