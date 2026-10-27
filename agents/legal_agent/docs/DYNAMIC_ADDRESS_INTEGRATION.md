@@ -1,5 +1,9 @@
 # Dynamic multi-source tenant-risk investigations
 
+> **Historical development log.** This file records an earlier checkpoint. Its test counts, "not verified" statements and
+> `reports/...` file references describe that moment only: `reports/` held local, gitignored captures that are not in this
+> repository. Current status and verified results are in the [root README](../../../README.md).
+
 ## What works
 
 The default address-driven command accepts a NYC street address, borough and
@@ -117,7 +121,8 @@ Replay requires `--provider replay --replay <report.json>` and exact recorded
 queries; a new property cannot reuse another property's capture. Original source
 timestamps are retained. Synthetic test providers remain labelled mock.
 
-Keeper's World Model remains authoritative. The emitted board projection contains
+No World Model service is built in this repository; the board projection is an in-process
+adapter for a future one. The emitted board projection contains
 identity provenance, source evidence, accepted facts, legal findings/reviews,
 coverage, held decisions and follow-ups. It does not persist a competing memory
 database or promote summaries into source evidence. The team's root Critic,

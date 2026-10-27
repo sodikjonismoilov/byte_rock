@@ -1,5 +1,8 @@
 # NYC Legal Research Agent
 
+> Project overview, quick start, verified results and limitations: see the [root README](../../README.md).
+> This file documents the legal-research specialist and its CLI.
+
 An address-based specialist for the team's NYC rental investigation. Accepted city
 records support factual observations; retrieved official authorities support legal
 research. Legal review can be INCONCLUSIVE while a useful factual report succeeds.
@@ -7,9 +10,10 @@ No safety score or historical liability conclusion is inferred from incomplete d
 
 ## Clean-checkout setup
 
-Run all commands below from the repository root. Use Python 3.11+ and Node.js 22.18+
-(or a newer supported release with `--experimental-transform-types`) for the
-vendored official H-MEM engine. There is no npm install step for that engine.
+Run all commands below from the repository root. Use Python 3.11+ and **Node.js 22**
+for the vendored official H-MEM engine, which starts with
+`node --experimental-transform-types`; newer Node versions reject that flag (the Dockerfile
+pins Node 22). There is no npm install step for that engine.
 
 ```sh
 python3 -m venv .venv
@@ -47,13 +51,16 @@ commit either local file, a connect link or a token.
   Use `LLM_PROVIDER=meterless` with `--reasoning configured`.
 - Nightshift compatibility: `NIGHTSHIFT_BASE_URL`, `NIGHTSHIFT_MODEL`,
   `NIGHTSHIFT_API_KEY` are the legacy Meterless Runtime adapter aliases selected by
-  `--reasoning nightshift`. This contract is tested; a live Nightshift endpoint
-  has **not** been demonstrated.
+  `--reasoning nightshift`. This contract is tested, and a live Nightshift endpoint has
+  answered through the preferred `LLM_PROVIDER=meterless` path (see the root README,
+  Evidence section).
 - Persistent H-MEM: use `--memory-dir .local/legal-memory` or `LEGAL_MEMORY_DIR`.
   This invokes the vendored official engine locally; no running Meterless HTTP
   service is needed for H-MEM. Memory remains untrusted context, never evidence.
 
-Exact live address command (requires configured gateway and NVIDIA):
+The project front door for live runs is `python run.py <input.json>` (root README); it applies the
+larger defaults below and uses `LLM_PROVIDER=meterless`. This direct-NVIDIA command from an earlier
+checkpoint still works if you have an NVIDIA key (requires configured gateway and NVIDIA):
 
 ```sh
 LEGAL_CONTEXT_MAX_BYTES=60000 LEGAL_CONTEXT_MAX_TOKENS=60000 LEGAL_MODEL_MAX_TOKENS=100000 .venv/bin/python scripts/investigate_address.py '840 Second Avenue, Manhattan, NY' --borough Manhattan --reasoning nvidia --memory-dir .local/legal-memory --page-size 5 --max-pages 1 --model-timeout 60 --output reports/investigations
@@ -97,11 +104,12 @@ adapter awaiting the team's orchestrator/transport**, not a deployed shared Worl
 Model. H-MEM is separate. No global Planner or root Critic replacement is included.
 
 See [final readiness audit](docs/PRE_PUSH_AUDIT.md) for what is test-backed versus
-previously demonstrated live. Live NVIDIA calls and H-MEM retrieval were observed;
-the latest model Critic response failed evidence-ID validation, so no completed live
-legal review or legal publication is claimed. Historical law applicability, current
-conditions, unit rent status and full source coverage remain unverified where absent.
-Root BLOCKED always prevents publication. No live requests were made for this polish.
+previously demonstrated live. At that checkpoint live NVIDIA calls and H-MEM retrieval had
+been observed but the model Critic response failed evidence-ID validation. In the two saved
+Nightshift-backed runs (root README, Evidence section) the legal Critic returned INCONCLUSIVE and
+no legal finding was published, so no completed legal review is claimed. Historical law
+applicability, current conditions, unit rent status and full source coverage remain unverified
+where absent. Root BLOCKED always prevents publication.
 
 ## Offline validation
 
@@ -143,9 +151,9 @@ python scripts/investigate_address.py '840 Second Avenue, Manhattan'
 python scripts/investigate_address.py '102-15 1 Street' --borough Queens --goals habitability
 ```
 
-Run these commands from the repository root. The source registry covers 17
-machine-readable agency datasets verified with real Zetaris rows, plus manual
-HCR and court references. Upstream filters and pagination are registered per
+Run these commands from the repository root. The source registry lists 20 sources: 17
+machine-readable agency datasets verified with real Zetaris rows, plus 3 manual-only
+references (`hcr_rent_regulation`, `webcivil_local`, `webcivil_supreme`). Upstream filters and pagination are registered per
 bounded run; the old ZIP demo tables are not used as citywide data. The report
 separates coverage, accepted factual findings, and legal uncertainty. Root Critic
 vetoes and unit/lot scope remain enforced. See
@@ -250,7 +258,7 @@ No credentials are included in model messages or committed configuration. HTTPS 
 
 Python search timeouts stop waiting; Python cannot kill an already running thread. Future remote adapters must also enforce transport deadlines and read-only database credentials. All model adapters are wrapped with call budgets, output validation and waiting deadlines. Custom adapters must also enforce transport deadlines because Python cannot kill running threads; the supplied HTTP adapter implements transport timeouts and bounded retries. Do not expose arbitrary loader or adapter callables in HTTP requests.
 
-Agent context contains task-specific evidence, identity, sources, findings and feedback, not accumulated chat history or credentials. The authoritative registry is separate from projections. `MemoryAdapter` defines the future Meterless H-MEM boundary; no competing persistent memory is implemented. Memory is not wired into production execution yet. All retrieved text is treated as untrusted data; prompt instructions reduce injection risk but are not a guarantee of model behavior.
+Agent context contains task-specific evidence, identity, sources, findings and feedback, not accumulated chat history or credentials. The authoritative registry is separate from projections. `MemoryAdapter` defines the Meterless H-MEM boundary; `memory.LegalMemory` implements it on the vendored H-MEM engine and is wired into address runs (`--memory-dir` / `LEGAL_MEMORY_DIR`; `run.py` enables it by default). No competing persistent memory is implemented. All retrieved text is treated as untrusted data; prompt instructions reduce injection risk but are not a guarantee of model behavior.
 
 ## Flask and demonstrations
 
@@ -268,4 +276,4 @@ These return complaint-only inconclusive, supported pest research completed, and
 
 ## Remaining integrations
 
-The initial HPD Building Files/violation path works through Zetaris. Broader coverage, GeoSearch, 311/DOB, HPD litigation, eviction datasets, WebCivil Local, Supreme Court/NYSCEF documents, entity ownership/property linkage, operative-law retrieval, Nightshift validation and Meterless storage remain team integration work. Restricted, sealed and missing court records must be reported as coverage limitations. A missing search result is never proof of a clean history. Apartment rent status still requires unit-specific records. No production legal accuracy or live provider reliability claim is made.
+Address-driven retrieval of the 17 machine-readable sources works through Zetaris (see the sections above). Still open: the 3 manual-only sources (HCR unit rent history, WebCivil Local, Supreme Court/NYSCEF), entity ownership/property linkage, operative-law version retrieval, and a shared World Model service (not built; `integration.board_update` is an in-process adapter). Restricted, sealed and missing court records must be reported as coverage limitations. A missing search result is never proof of a clean history. Apartment rent status still requires unit-specific records. No production legal accuracy or live provider reliability claim is made.

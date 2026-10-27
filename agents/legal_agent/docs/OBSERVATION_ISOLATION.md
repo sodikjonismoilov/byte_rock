@@ -1,5 +1,9 @@
 # Strict observation isolation
 
+> **Historical development log.** This file records an earlier checkpoint. Its test counts, "not verified" statements and
+> `reports/...` file references describe that moment only: `reports/` held local, gitignored captures that are not in this
+> repository. Current status and verified results are in the [root README](../../../README.md).
+
 The model-facing `CanonicalResearchDraft.findings` is a list of independently
 validated observations. Each observation cites property evidence and retrieved
 legal authorities directly; the wire schema does not define finding-to-finding

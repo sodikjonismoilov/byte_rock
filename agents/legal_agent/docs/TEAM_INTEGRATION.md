@@ -1,5 +1,9 @@
 # Hackathon integration boundary
 
+> **Historical development log.** This file records an earlier checkpoint. Its test counts, "not verified" statements and
+> `reports/...` file references describe that moment only: `reports/` held local, gitignored captures that are not in this
+> repository. Current status and verified results are in the [root README](../../../README.md).
+
 > Current safeguard/model/context/tracing status: [production integration checkpoint](PRODUCTION_INTEGRATION.md).
 > Earlier deterministic-only execution notes below describe the original captures.
 
@@ -123,7 +127,8 @@ Test dependencies were installed in a temporary environment outside the repo.
 Pending: Clerk expansion beyond bounded HPD REST sources and full coverage verification;
 Matcher verified card/confidence and correction loop; Conductor global retry and
 timeout budget; Reporter verdict and product rendering; Nightshift adapter/live
-model validation; Keeper World Model persistence and load-twice test. Catalog
+model validation (since done, see the root README); Keeper World Model persistence
+and load-twice test (not built; the verdict is now computed by `verdict.py`). Catalog
 legal authorities remain curated background sources with unverified operative
 versions. No new substantive legal advice was asserted from them. No real
 sample address, legal finding or safety verdict can be claimed yet.

@@ -1,5 +1,9 @@
 # Implementation and validation record
 
+> **Historical development log.** This file records an earlier checkpoint. Its test counts, "not verified" statements and
+> `reports/...` file references describe that moment only: `reports/` held local, gitignored captures that are not in this
+> repository. Current status and verified results are in the [root README](../../../README.md).
+
 The original repository was inspected before edits: workflow, Pydantic schemas, every agent/tool/test, CLI, fixtures and catalog. Baseline: 19 passing tests. A source snapshot was retained in the chat workspace's work/baseline folder. The implementation extends the existing workflow rather than introducing an agent framework.
 
 The incremental plan preserved public contracts with defaulted additions, then implemented identity resolution; per-issue findings and catalog expansion; provider-backed structured agents; reconciliation and critique; execution/context boundaries; and Flask/contracts/examples. Tests ran at each stage. Existing tests were preserved without edits. Final validation: **60 passed, one explicitly disabled live-model smoke test skipped**. Compilation and both standalone examples also pass. Four original example statuses remain heat completed, complaint-only pests inconclusive, confirmed pests completed, and thin water evidence inconclusive.

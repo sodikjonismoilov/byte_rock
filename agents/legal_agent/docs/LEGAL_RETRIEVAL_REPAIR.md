@@ -1,5 +1,9 @@
 # Legal retrieval and recoverable review loop — 2026-10-26
 
+> **Historical development log.** This file records an earlier checkpoint. Its test counts, "not verified" statements and
+> `reports/...` file references describe that moment only: `reports/` held local, gitignored captures that are not in this
+> repository. Current status and verified results are in the [root README](../../../README.md).
+
 ## Reproduced before editing
 
 Inspected the full saved 840 Second Avenue capture, imports, schemas, actual ModelAgents

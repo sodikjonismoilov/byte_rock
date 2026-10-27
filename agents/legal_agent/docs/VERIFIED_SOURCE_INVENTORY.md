@@ -1,5 +1,7 @@
 # Verified NYC source inventory
 
+> **Note:** the `reports/...` files mentioned below were local, gitignored captures and are not in this repository; `data/source_registry.json` is the committed source of truth (20 registered sources: 17 machine-readable, 3 manual-only). See the [root README](../../../README.md).
+
 Verified 2026-10-25 against official NYC metadata and genuine Zetaris REST row queries.
 
 All 17 machine-readable datasets below returned an actual row in the capability probe. This verifies connector/schema/agency-key access, not complete historical or address-specific coverage. The probe registrations were temporary and removed. Per-address availability, empty filters, budgets, and truncation are reported separately.

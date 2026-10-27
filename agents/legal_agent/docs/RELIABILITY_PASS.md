@@ -1,5 +1,9 @@
 # Bounded Researcher reliability pass
 
+> **Historical development log.** This file records an earlier checkpoint. Its test counts, "not verified" statements and
+> `reports/...` file references describe that moment only: `reports/` held local, gitignored captures that are not in this
+> repository. Current status and verified results are in the [root README](../../../README.md).
+
 ## Scope and failure diagnosis
 
 The previous full-address Researcher tried to cover seven global categories in a

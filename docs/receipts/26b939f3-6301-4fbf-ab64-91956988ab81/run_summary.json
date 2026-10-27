@@ -1,0 +1,332 @@
+{
+  "schema_version": "legal.run.v1",
+  "run_id": "26b939f3-6301-4fbf-ab64-91956988ab81",
+  "task_id": "address-26b939f3-6301-4fbf-ab64-91956988ab81",
+  "status": "inconclusive",
+  "exit_code": 2,
+  "termination_reason": "legal_inconclusive",
+  "provider": "zetaris",
+  "data_mode": "live",
+  "mode": "configured",
+  "citation_metrics": {
+    "cited_claims": 2,
+    "claims_with_valid_source_identity": 2,
+    "claims_with_verified_support": 2,
+    "published_legal_findings": 0
+  },
+  "identity_status": "verified",
+  "execution": {
+    "run_id": "26b939f3-6301-4fbf-ab64-91956988ab81",
+    "tool_calls": 45,
+    "model_calls": 6,
+    "elapsed_seconds": 428.76773912494536,
+    "deadline_seconds": 480.0
+  },
+  "total_duration_seconds": 428.81509341602214,
+  "model_activity": [
+    {
+      "provider": "meterless",
+      "model": "meterless/auto",
+      "schema": "ResearchPlan",
+      "attempt": 0
+    },
+    {
+      "provider": "meterless",
+      "configured_model": "meterless/auto",
+      "returned_model": "nvidia/nemotron-3.5-bolt-e4b",
+      "schema": "ResearchPlan",
+      "status": "completed",
+      "usage": {
+        "prompt_tokens": 17931,
+        "completion_tokens": 940,
+        "total_tokens": 18871
+      },
+      "duration_seconds": 27.479848042014055
+    },
+    {
+      "provider": "meterless",
+      "model": "meterless/auto",
+      "schema": "ResearchDraft",
+      "attempt": 0
+    },
+    {
+      "provider": "meterless",
+      "configured_model": "meterless/auto",
+      "returned_model": "nvidia/nemotron-3.5-bolt-e4b",
+      "schema": "ResearchDraft",
+      "status": "completed",
+      "usage": {
+        "prompt_tokens": 13621,
+        "completion_tokens": 756,
+        "total_tokens": 14377
+      },
+      "duration_seconds": 107.11148666695226
+    },
+    {
+      "provider": "meterless",
+      "model": "meterless/auto",
+      "schema": "CriticReport",
+      "attempt": 0
+    },
+    {
+      "provider": "meterless",
+      "configured_model": "meterless/auto",
+      "returned_model": "nvidia/nemotron-3.5-bolt-e4b",
+      "schema": "CriticReport",
+      "status": "completed",
+      "usage": {
+        "prompt_tokens": 19535,
+        "completion_tokens": 923,
+        "total_tokens": 20458
+      },
+      "duration_seconds": 79.51061995804776
+    },
+    {
+      "provider": "meterless",
+      "model": "meterless/auto",
+      "schema": "ResearchPlan",
+      "attempt": 0
+    },
+    {
+      "provider": "meterless",
+      "configured_model": "meterless/auto",
+      "returned_model": "nvidia/nemotron-3.5-bolt-e4b",
+      "schema": "ResearchPlan",
+      "status": "completed",
+      "usage": {
+        "prompt_tokens": 21935,
+        "completion_tokens": 819,
+        "total_tokens": 22754
+      },
+      "duration_seconds": 26.892512916005217
+    },
+    {
+      "provider": "meterless",
+      "model": "meterless/auto",
+      "schema": "ResearchDraft",
+      "attempt": 0
+    },
+    {
+      "provider": "meterless",
+      "configured_model": "meterless/auto",
+      "returned_model": "nvidia/nemotron-3.5-bolt-e4b",
+      "schema": "ResearchDraft",
+      "status": "completed",
+      "usage": {
+        "prompt_tokens": 19875,
+        "completion_tokens": 696,
+        "total_tokens": 20571
+      },
+      "duration_seconds": 29.355666332994588
+    },
+    {
+      "provider": "meterless",
+      "model": "meterless/auto",
+      "schema": "CriticReport",
+      "attempt": 0
+    },
+    {
+      "provider": "meterless",
+      "configured_model": "meterless/auto",
+      "returned_model": "nvidia/nemotron-3.5-bolt-e4b",
+      "schema": "CriticReport",
+      "status": "completed",
+      "usage": {
+        "prompt_tokens": 20989,
+        "completion_tokens": 968,
+        "total_tokens": 21957
+      },
+      "duration_seconds": 108.30374645791017
+    }
+  ],
+  "source_coverage": [
+    {
+      "source": "hpd_buildings",
+      "title": "Buildings Subject to HPD Jurisdiction",
+      "source_url": "https://data.cityofnewyork.us/d/kj4p-ruqc",
+      "status": "retrieved",
+      "complete_for_filter": true,
+      "records_returned": 1,
+      "reason": ""
+    },
+    {
+      "source": "hpd_registrations",
+      "title": "Multiple Dwelling Registrations",
+      "source_url": "https://data.cityofnewyork.us/d/tesw-yqqr",
+      "status": "retrieved",
+      "complete_for_filter": true,
+      "records_returned": 1,
+      "reason": ""
+    },
+    {
+      "source": "registration_contacts",
+      "title": "Registration Contacts",
+      "source_url": "https://data.cityofnewyork.us/d/feu5-w2e2",
+      "status": "retrieved",
+      "complete_for_filter": true,
+      "records_returned": 5,
+      "reason": ""
+    },
+    {
+      "source": "hpd_violations",
+      "title": "Housing Maintenance Code Violations",
+      "source_url": "https://data.cityofnewyork.us/d/wvxf-dwi5",
+      "status": "retrieved",
+      "complete_for_filter": true,
+      "records_returned": 86,
+      "reason": ""
+    },
+    {
+      "source": "hpd_complaints",
+      "title": "Housing Maintenance Code Complaints and Problems",
+      "source_url": "https://data.cityofnewyork.us/d/ygpa-z7cr",
+      "status": "no_records",
+      "complete_for_filter": true,
+      "records_returned": 0,
+      "reason": ""
+    },
+    {
+      "source": "dob_complaints",
+      "title": "DOB Complaints Received",
+      "source_url": "https://data.cityofnewyork.us/d/eabe-havv",
+      "status": "retrieved",
+      "complete_for_filter": true,
+      "records_returned": 14,
+      "reason": ""
+    },
+    {
+      "source": "dob_violations",
+      "title": "DOB Violations",
+      "source_url": "https://data.cityofnewyork.us/d/3h2n-5cm9",
+      "status": "retrieved",
+      "complete_for_filter": true,
+      "records_returned": 18,
+      "reason": ""
+    },
+    {
+      "source": "dob_ecb",
+      "title": "DOB ECB Violations",
+      "source_url": "https://data.cityofnewyork.us/d/6bgk-3dad",
+      "status": "retrieved",
+      "complete_for_filter": true,
+      "records_returned": 3,
+      "reason": ""
+    },
+    {
+      "source": "dob_permits",
+      "title": "DOB Permit Issuance",
+      "source_url": "https://data.cityofnewyork.us/d/ipu4-2q9a",
+      "status": "retrieved",
+      "complete_for_filter": true,
+      "records_returned": 47,
+      "reason": ""
+    },
+    {
+      "source": "dob_jobs",
+      "title": "DOB Job Application Filings",
+      "source_url": "https://data.cityofnewyork.us/d/ic3t-wcy2",
+      "status": "retrieved",
+      "complete_for_filter": true,
+      "records_returned": 70,
+      "reason": ""
+    },
+    {
+      "source": "fdny_oath",
+      "title": "OATH Hearings Division Case Status",
+      "source_url": "https://data.cityofnewyork.us/d/jz4z-kudi",
+      "status": "retrieved",
+      "complete_for_filter": true,
+      "records_returned": 17,
+      "reason": ""
+    },
+    {
+      "source": "hpd_aep",
+      "title": "Buildings Selected for the Alternative Enforcement Program (AEP)",
+      "source_url": "https://data.cityofnewyork.us/d/hcir-3275",
+      "status": "no_records",
+      "complete_for_filter": true,
+      "records_returned": 0,
+      "reason": ""
+    },
+    {
+      "source": "executed_evictions",
+      "title": "Evictions",
+      "source_url": "https://data.cityofnewyork.us/d/6z8x-wfk4",
+      "status": "no_records",
+      "complete_for_filter": true,
+      "records_returned": 0,
+      "reason": ""
+    },
+    {
+      "source": "conh",
+      "title": "Certification of No Harassment (CONH) Pilot Building List",
+      "source_url": "https://data.cityofnewyork.us/d/bzxi-2tsw",
+      "status": "no_records",
+      "complete_for_filter": true,
+      "records_returned": 0,
+      "reason": ""
+    },
+    {
+      "source": "hpd_litigation",
+      "title": "Housing Litigations",
+      "source_url": "https://data.cityofnewyork.us/d/59kj-x8nc",
+      "status": "no_records",
+      "complete_for_filter": true,
+      "records_returned": 0,
+      "reason": ""
+    },
+    {
+      "source": "dob_now_permits",
+      "title": "DOB NOW: Build \u2013 Approved Permits",
+      "source_url": "https://data.cityofnewyork.us/d/rbx6-tga4",
+      "status": "retrieved",
+      "complete_for_filter": true,
+      "records_returned": 7,
+      "reason": ""
+    },
+    {
+      "source": "dob_now_jobs",
+      "title": "DOB NOW: Build \u2013 Job Application Filings",
+      "source_url": "https://data.cityofnewyork.us/d/w9ak-ipjd",
+      "status": "retrieved",
+      "complete_for_filter": true,
+      "records_returned": 5,
+      "reason": ""
+    },
+    {
+      "source": "hcr_rent_regulation",
+      "title": "HCR rent-regulated building reference / apartment rent history",
+      "source_url": "https://hcr.ny.gov/office-rent-administration-ora",
+      "status": "manual_only",
+      "complete_for_filter": false,
+      "records_returned": 0,
+      "reason": "Building-list membership does not establish the requested apartment status. No verified machine-readable address API is configured. Tenant must obtain unit rent history."
+    },
+    {
+      "source": "webcivil_local",
+      "title": "WebCivil Local / Housing Court",
+      "source_url": "https://www.nycourts.gov/e-courts",
+      "status": "manual_only",
+      "complete_for_filter": false,
+      "records_returned": 0,
+      "reason": "No authorized structured case connector configured. LT listings have limited calendar visibility; no result is not proof of no proceedings. Do not scrape access controls."
+    },
+    {
+      "source": "webcivil_supreme",
+      "title": "WebCivil Supreme / NYSCEF",
+      "source_url": "https://www.nycourts.gov/help/representing-yourself-court/getting-court-records-case-information",
+      "status": "manual_only",
+      "complete_for_filter": false,
+      "records_returned": 0,
+      "reason": "Manual party/index/document verification required. Aggregated/de-identified case statistics cannot establish address-specific proceedings."
+    }
+  ],
+  "errors": [],
+  "files": {
+    "investigation_report.md": "outputs/20261027T173405006563Z_26b939f3-6301-4fbf-ab64-91956988ab81/investigation_report.md",
+    "investigation_report.json": "outputs/20261027T173405006563Z_26b939f3-6301-4fbf-ab64-91956988ab81/investigation_report.json",
+    "renter_report.md": "outputs/20261027T173405006563Z_26b939f3-6301-4fbf-ab64-91956988ab81/renter_report.md",
+    "trace.jsonl": "outputs/20261027T173405006563Z_26b939f3-6301-4fbf-ab64-91956988ab81/trace.jsonl",
+    "run_summary.json": "outputs/20261027T173405006563Z_26b939f3-6301-4fbf-ab64-91956988ab81/run_summary.json"
+  }
+}

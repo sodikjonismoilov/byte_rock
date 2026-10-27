@@ -1,5 +1,9 @@
 # Meterless Runtime v4 and persistent legal memory
 
+> **Historical development log.** This file records an earlier checkpoint. Its test counts, "not verified" statements and
+> `reports/...` file references describe that moment only: `reports/` held local, gitignored captures that are not in this
+> repository. Current status and verified results are in the [root README](../../../README.md).
+
 The provider follows the Runtime 1.4/v4 contract on
 https://meterless.ai/engines.html (POWER → Add Meterless as a provider).
 The repository's older provider guide still describes Runtime 0.90.0; v4 is
@@ -76,11 +80,14 @@ team authentication and reverse-proxy configuration remain team responsibilities
 
 ## Actual runtime status
 
-The local 12-endpoint probe found **LIVE_NIGHTSHIFT_NOT_AVAILABLE**. No runtime token
-was fabricated or runtime installed. Wrong-token→unauthorized, Auto Detect, unknown
-routing IDs, real headers, private connect parsing, and string-returning chat pass
-mocked transport tests. Live Meterless inference is **not verified**. The provider
-is ready for a real runtime/connect link, not claimed online.
+At the time of this log, a local 12-endpoint probe found **LIVE_NIGHTSHIFT_NOT_AVAILABLE**,
+and live Meterless inference was not yet verified. **That has since changed:** a local
+Nightshift runtime at `http://127.0.0.1:8088/v1` answered all four aliases (`meterless/auto`,
+`fast`, `cheap`, `deep`) with `nvidia/nemotron-3.5-bolt-e4b` (receipt:
+`docs/receipts/nightshift_smoke.json`), and two full model-backed runs through
+`LLM_PROVIDER=meterless` are saved under `docs/receipts/` (see the root README, Evidence
+section). The mocked-transport tests (wrong-token→unauthorized, Auto Detect, unknown
+routing IDs, real headers, private connect parsing, string-returning chat) remain.
 
 A fresh NVIDIA regression smoke after this provider addition passed with actual
 configured/API-returned model `nvidia/nemotron-3.5-bolt-e4b`. Receipt:

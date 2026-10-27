@@ -1,5 +1,9 @@
 # Legal production integration checkpoint — 2026-10-25
 
+> **Historical development log.** This file records an earlier checkpoint. Its test counts, "not verified" statements and
+> `reports/...` file references describe that moment only: `reports/` held local, gitignored captures that are not in this
+> repository. Current status and verified results are in the [root README](../../../README.md).
+
 > Latest provider and persistent-memory implementation: [Meterless Runtime v4 and H-MEM](METERLESS_RUNTIME.md).
 
 > Latest: NVIDIA credentials are configured. A live smoke and all three model roles completed; see the follow-up below. Missing-configuration notes describe earlier captures.
@@ -199,8 +203,10 @@ three-role model address run, deterministic replay of the real capture, and the
 upstream H-MEM proof also passed. The final real capture has one shared run ID/task
 ID across 67 trace events and records successful cleanup. Fixture and injected-model
 tests establish wiring and contracts, not live model accuracy. Model accuracy,
-provider JSON-mode support and underlying Nightshift fleet identity still need a
-credentialed live smoke test before the demo claims Nemotron reasoning.
+provider JSON-mode support and underlying Nightshift fleet identity still needed a
+credentialed live smoke test at this checkpoint. That test has since been run: every
+model call through Nightshift reports `returned_model` `nvidia/nemotron-3.5-bolt-e4b`
+(see the root README, Evidence section).
 
 ## Credentialed live-model follow-up
 

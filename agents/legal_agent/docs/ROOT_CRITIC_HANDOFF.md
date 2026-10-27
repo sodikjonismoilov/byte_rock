@@ -1,3 +1,7 @@
+> **Historical development log.** This file records an earlier checkpoint. Its test counts, "not verified" statements and
+> `reports/...` file references describe that moment only: `reports/` held local, gitignored captures that are not in this
+> repository. Current status and verified results are in the [root README](../../../README.md).
+
 > **Update:** integration.py now gives R5 a content signature, so distinct same-day records are no longer collapsed. critic.py is untouched; the owner's change described in this document is still the cleaner long-term fix.
 
 # Root Critic owner handoff — no teammate code modified

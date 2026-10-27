@@ -1,5 +1,9 @@
 # Legal Agent stabilization and pre-push audit
 
+> **Historical development log.** This file records an earlier checkpoint. Its test counts, "not verified" statements and
+> `reports/...` file references describe that moment only: `reports/` held local, gitignored captures that are not in this
+> repository. Current status and verified results are in the [root README](../../../README.md).
+
 ## Scope
 
 Presentation-only renter report improvements plus documentation, safe synthetic test
@@ -34,9 +38,9 @@ is added. This generated report and its original capture are intentionally not s
   not become durable authoritative memory. Official conformance is checked locally.
 - **Meterless/Nightshift provider:** Runtime v4 normalization, real authentication,
   routing IDs, discovery, plain text and failure states have transport-based tests.
-  Nightshift configuration is a legacy alias to this contract. No live Nightshift
-  or current HTTP Runtime success is claimed; endpoint availability/configuration
-  remains an external prerequisite.
+  Nightshift configuration is a legacy alias to this contract. At this checkpoint no
+  live Nightshift success was claimed; it has since been verified (see the root README,
+  Evidence section). A reachable local runtime remains an external prerequisite.
 - **Shared context:** `integration.board_update` exports original evidence,
   authority refs, publication-filtered legal findings, coverage gaps, source/review
   limitations and status. `SharedInvestigationState.read/update` is a versioned

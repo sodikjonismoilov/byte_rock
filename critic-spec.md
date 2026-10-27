@@ -1,5 +1,11 @@
 # The Critic — build spec (Crypto's agent)
 
+> **Status (see the [root README](README.md)):** rules R1-R10 are implemented in `critic.py` and all 12
+> fixtures pass (`python critic.py critic-fixtures.json`). The LLM gray-zone pass described below
+> (`llm_review`) is a placeholder and is **not wired in**; the Warden is rules-only. The Matcher and
+> Investigator named in this spec are not built as separate agents, and there is no World Model board
+> service; records reach the Critic through `integration.py`. This file is the original spec, kept as written.
+
 Two jobs, both are vetoes:
 1. **Match veto** — reject/quarantine suspicious record→building links
    from the Matcher before they reach the Investigator.

@@ -1,5 +1,9 @@
 # Delivery status — dynamic NYC tenant-risk investigation
 
+> **Historical development log.** This file records an earlier checkpoint. Its test counts, "not verified" statements and
+> `reports/...` file references describe that moment only: `reports/` held local, gitignored captures that are not in this
+> repository. Current status and verified results are in the [root README](../../../README.md).
+
 ## Actual verification
 
 - Machine-readable sources with genuine Zetaris row retrieval: 17. HCR/court references: three manual-only capabilities.

@@ -1,10 +1,14 @@
 # One-command observable address investigation
 
+> **Historical development log.** This file records an earlier checkpoint. Its test counts, "not verified" statements and
+> `reports/...` file references describe that moment only: `reports/` held local, gitignored captures that are not in this
+> repository. Current status and verified results are in the [root README](../../../README.md).
+
 Use the existing address CLI. It calls `address_investigation.investigate_address`;
 agent execution remains in the existing workflow, identity resolver, reconciler and
 local/root Critic adapters. No alternate orchestrator or global state store was added.
 
-From `/Users/yawen/Desktop/projects/byte_rock`, the exact verified command is:
+From the repository root, the command verified at that checkpoint was:
 
 ```bash
 PYTHONDONTWRITEBYTECODE=1 LEGAL_CONTEXT_MAX_BYTES=60000 LEGAL_CONTEXT_MAX_TOKENS=60000 LEGAL_MODEL_MAX_TOKENS=100000 .venv/bin/python -B scripts/investigate_address.py '840 Second Avenue, Manhattan, NY' --borough Manhattan --reasoning nvidia --memory-dir .local/legal-memory-demo --page-size 5 --max-pages 1 --model-timeout 60 --output reports/investigations
@@ -31,7 +35,8 @@ are shared by all stages. Repeating a command does not overwrite earlier artifac
 - `--reasoning nightshift`: explicitly chooses the existing Meterless Runtime alias,
   with authenticated model discovery, real runtime token and a discovered routing ID.
   Its 180-second per-call wait is still constrained by the aggregate deadline.
-  No local runtime was available at the prior integration checkpoint.
+  (No local runtime was available at that checkpoint. A local Nightshift runtime has since
+  answered live; see the root README, Evidence section.)
 - `--reasoning deterministic`: existing labeled heuristic agents, no model calls.
 - Legacy `model` and `configured` choices remain available. Model/provider errors
   produce structured incomplete/error outcomes; they never switch to deterministic.
