@@ -1,8 +1,79 @@
-# SignSafe
 
-**Team ByteRock · Track 1 (Solving Fragmented Intelligence) · GenAI.Works Open Agent Hackathon 2026**
+# SignSafe — Know the Building Before You Sign
 
-SignSafe takes a New York City address and checks what the city's own records say about the building before you sign a lease. NYC records name the same building in different ways, so SignSafe first resolves the building's identity, then pulls the records through Zetaris, has a rule-based root Critic throw out records that do not belong to this building, and applies fixed rules to what is left. The result is a verdict with the rule that fired and the evidence IDs (agency dataset + record ID) behind it, plus a list of what could not be checked. Three AI roles (Planner, Researcher, legal Critic) run on a Nemotron model through Meterless Nightshift to look for legal context. **They are advisory: they cannot change the verdict, and in every saved run they stopped at INCONCLUSIVE and published nothing.**
+**An autonomous, evidence-driven NYC renter investigation platform.**
+
+*Team ByteRock · GenAI.Works Open Agent Hackathon 2026*
+
+Before signing a lease, renters often have to search scattered city databases, reconcile inconsistent building identifiers, and determine which records actually apply to a property.
+
+**SignSafe turns a NYC street address into an evidence-backed housing-risk assessment**, helping renters uncover potential concerns through official records, transparent decision rules, and verifiable citations.
+
+SignSafe homepage and address search <img width="90%" alt="signsafe-home" src="https://github.com/user-attachments/assets/07673d90-40fc-4b38-8560-be054f346285" />
+
+
+**Product demo coming soon**  · [Source Code](https://github.com/sodikjonismoilov/byte_rock) · [Run Locally](#quick-start-for-judges)
+
+---
+
+## How SignSafe Works
+
+**Enter an address → Verify the building → Investigate city records → Review evidence → Get a cited verdict**
+
+SignSafe coordinates **seven specialist roles** to investigate public housing records, resolve conflicting evidence, and deliver a clear assessment without relying on unverified AI conclusions.
+
+1. **Identify the building** — Match an NYC address against official property identifiers to ensure records belong to the correct building.
+2. **Investigate housing risks** — Retrieve relevant government records covering housing violations, maintenance complaints, building permits, and other renter-related concerns across **20 registered data-source definitions**.
+3. **Verify the evidence** — Filter mismatched or unreliable records through deterministic checks while autonomous AI agents research legal context and independently critique findings.
+4. **Deliver an explainable verdict** — Present actionable concerns, supporting agency records, and any missing information in an accessible report.
+
+### Seven Specialists, One Investigation
+
+SignSafe seven specialist workflow <img width="90%" alt="signsafe-workflow" src="https://github.com/user-attachments/assets/c3ad9413-cc96-451c-8787-d9cc1ac210c4" />
+
+
+The system combines deterministic components for property matching, data retrieval, evidence screening, and verdict generation with **three NVIDIA Nemotron-powered legal research roles** for planning, investigation, and independent critique.
+
+### Watch the Investigation Unfold
+
+SignSafe live investigation with agent progress and 3D evidence board <img width="90%" alt="signsafe-investigation" src="https://github.com/user-attachments/assets/84a00e60-2c57-4b5d-b989-6be56b87a8c3" />
+
+
+The interactive investigation board visualizes agent progress and links evidence to the property under review. Records are checked, accepted, rejected, or held for further review before contributing to the final assessment.
+
+### Evidence-Backed Results
+
+SignSafe report showing WALK AWAY verdict and cited housing records <img width="90%" alt="signsafe-report" src="https://github.com/user-attachments/assets/4b9780fb-39eb-44d6-8083-6d32ad9de077" />
+
+
+SignSafe generates one of four assessments:
+
+| Verdict | Meaning |
+|---------|---------|
+| **WALK AWAY** | Serious recorded housing concerns meet predefined warning rules. |
+| **CAUTION** | Housing issues warrant further investigation before renting. |
+| **NO FLAGS FOUND** | No warning rules triggered within the records checked; this does not certify safety. |
+| **NOT ENOUGH DATA** | Available evidence is insufficient for a reliable assessment. |
+
+Every triggered rule includes supporting record identifiers and links to official sources. Unchecked records and uncertainty remain visible rather than being interpreted as favorable results.
+
+---
+
+## Engineering Highlights
+
+- **Autonomous multi-agent workflow:** Seven specialist roles coordinate data collection, identity resolution, evidence verification, legal research, and final assessment.
+- **Broad public-data coverage:** 20 registered source definitions, including 17 machine-readable NYC data sources and three sources requiring manual follow-up.
+- **Independent verification:** Deterministic identity matching, root Critic rules, structured agent outputs, and citation validation prevent unsupported findings from being published.
+- **Persistent agent context:** Meterless H-MEM maintains investigation memory across runs while keeping remembered context separate from authoritative evidence.
+- **Model-backed legal reasoning:** NVIDIA Nemotron, routed through Meterless Nightshift, supports legal planning, research, and critique without controlling the rule-based verdict.
+- **Reproducible execution:** A Docker-based offline replay demonstrates the workflow without external API credentials.
+
+**Tech Stack:** Python · Flask · SQL · Zetaris · Meterless H-MEM · Meterless Nightshift · NVIDIA Nemotron · Docker · Git
+
+> **Important:** SignSafe reports what available agency records say about a property. It is not a building-safety certification or legal advice. Missing or incomplete data is explicitly disclosed.
+
+---
+
 
 **Scope:** it reports what agency records say, not what a building is like. It does not certify a building as safe, give legal advice, or establish liability. Missing or unchecked data is reported as unchecked, never as good news.
 
