@@ -9,7 +9,10 @@ Before signing a lease, renters often have to search scattered city databases, r
 
 **SignSafe turns a NYC street address into an evidence-backed housing-risk assessment**, helping renters uncover potential concerns through official records, transparent decision rules, and verifiable citations.
 
-SignSafe homepage and address search <img width="90%" alt="signsafe-home" src="https://github.com/user-attachments/assets/07673d90-40fc-4b38-8560-be054f346285" />
+<img width="90%" alt="signsafe-home" src="https://github.com/user-attachments/assets/07673d90-40fc-4b38-8560-be054f346285" />
+
+**Figure 1. Property Search Interface**
+_Enter a NYC address to initiate an evidence-based investigation of publicly available housing records._
 
 
 **Product demo coming soon**  · [Source Code](https://github.com/sodikjonismoilov/byte_rock) · [Run Locally](#quick-start-for-judges)
@@ -29,21 +32,30 @@ SignSafe coordinates **seven specialist roles** to investigate public housing re
 
 ### Seven Specialists, One Investigation
 
-SignSafe seven specialist workflow <img width="90%" alt="signsafe-workflow" src="https://github.com/user-attachments/assets/c3ad9413-cc96-451c-8787-d9cc1ac210c4" />
+<img width="90%" alt="signsafe-workflow" src="https://github.com/user-attachments/assets/c3ad9413-cc96-451c-8787-d9cc1ac210c4" />
+
+**Figure 2. Multi-Agent Investigation Architecture**  
+_Seven specialized roles coordinate property verification, record retrieval, evidence review, legal research, and rule-based assessment._
 
 
 The system combines deterministic components for property matching, data retrieval, evidence screening, and verdict generation with **three NVIDIA Nemotron-powered legal research roles** for planning, investigation, and independent critique.
 
 ### Watch the Investigation Unfold
 
-SignSafe live investigation with agent progress and 3D evidence board <img width="90%" alt="signsafe-investigation" src="https://github.com/user-attachments/assets/84a00e60-2c57-4b5d-b989-6be56b87a8c3" />
+<img width="90%" alt="signsafe-investigation" src="https://github.com/user-attachments/assets/84a00e60-2c57-4b5d-b989-6be56b87a8c3" />
+
+**Figure 3. Live Investigation and Evidence Tracking**  
+_The interactive case board visualizes investigation progress, source coverage, and records accepted, rejected, or held for review._
 
 
 The interactive investigation board visualizes agent progress and links evidence to the property under review. Records are checked, accepted, rejected, or held for further review before contributing to the final assessment.
 
 ### Evidence-Backed Results
 
-SignSafe report showing WALK AWAY verdict and cited housing records <img width="90%" alt="signsafe-report" src="https://github.com/user-attachments/assets/4b9780fb-39eb-44d6-8083-6d32ad9de077" />
+<img width="90%" alt="signsafe-report" src="https://github.com/user-attachments/assets/4b9780fb-39eb-44d6-8083-6d32ad9de077" />
+
+**Figure 4. Evidence-Backed Risk Assessment**
+_The final report presents a rule-based verdict with supporting agency records, traceable citations, and explicit data limitations._
 
 
 SignSafe generates one of four assessments:
